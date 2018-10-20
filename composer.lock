@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aac557384b40036908935fbdfab90397",
+    "content-hash": "5bfcf02089b3b72a99dd5bdb411a018b",
     "packages": [
         {
             "name": "akrabat/ip-address-middleware",
@@ -447,6 +447,53 @@
                 "string"
             ],
             "time": "2018-01-09T20:05:19+00:00"
+        },
+        {
+            "name": "ezyang/htmlpurifier",
+            "version": "v4.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ezyang/htmlpurifier.git",
+                "reference": "d85d39da4576a6934b72480be6978fb10c860021"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ezyang/htmlpurifier/zipball/d85d39da4576a6934b72480be6978fb10c860021",
+                "reference": "d85d39da4576a6934b72480be6978fb10c860021",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2"
+            },
+            "require-dev": {
+                "simpletest/simpletest": "^1.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "HTMLPurifier": "library/"
+                },
+                "files": [
+                    "library/HTMLPurifier.composer.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL"
+            ],
+            "authors": [
+                {
+                    "name": "Edward Z. Yang",
+                    "email": "admin@htmlpurifier.org",
+                    "homepage": "http://ezyang.com"
+                }
+            ],
+            "description": "Standards compliant HTML filter written in PHP",
+            "homepage": "http://htmlpurifier.org/",
+            "keywords": [
+                "html"
+            ],
+            "time": "2018-02-23T01:58:20+00:00"
         },
         {
             "name": "firebase/php-jwt",
@@ -992,16 +1039,16 @@
         },
         {
             "name": "lefuturiste/validator",
-            "version": "1.0.6",
+            "version": "1.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lefuturiste/validator.git",
-                "reference": "4f8de4ca6107fd927496f6975a60d833910f7a7b"
+                "reference": "035ec1cf4b4f4d54f61ad63ef2a9b487dfbc4ba5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lefuturiste/validator/zipball/4f8de4ca6107fd927496f6975a60d833910f7a7b",
-                "reference": "4f8de4ca6107fd927496f6975a60d833910f7a7b",
+                "url": "https://api.github.com/repos/lefuturiste/validator/zipball/035ec1cf4b4f4d54f61ad63ef2a9b487dfbc4ba5",
+                "reference": "035ec1cf4b4f4d54f61ad63ef2a9b487dfbc4ba5",
                 "shasum": ""
             },
             "require": {
@@ -1027,7 +1074,7 @@
                 }
             ],
             "description": "A simple validator helper for PS7 requests",
-            "time": "2018-10-07T20:03:13+00:00"
+            "time": "2018-10-19T18:49:19+00:00"
         },
         {
             "name": "nesbot/carbon",

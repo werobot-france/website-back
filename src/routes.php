@@ -12,6 +12,10 @@ $app->group('/post', function () use ($app) {
        ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
 })->add(new \App\Middlewares\CORSMiddleware());
 
+$app->map(['POST', 'OPTIONS'], '/contact', [\App\Controllers\ContactController::class, 'contact'])
+    ->add(new \RKA\Middleware\IpAddress())
+    ->add(new \App\Middlewares\CORSMiddleware());
+
 $app->group('/auth', function (){
     $this->get('/login[/]', [\App\Controllers\Account\STAILEUController::class, 'getLogin']);
 

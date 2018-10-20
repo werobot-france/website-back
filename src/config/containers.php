@@ -23,5 +23,8 @@ return [
             $container->get('staileu')['private'],
             $container->get('staileu')['public']
         );
+    },
+    \App\ReCaptcha::class => function (ContainerInterface $container) {
+        return new \App\ReCaptcha($container->get('recaptcha')['private']);
     }
 ];

@@ -15,6 +15,7 @@ class PostController extends Controller
     {
         $this->loadDatabase();
         $validator = new Validator($request->getQueryParams());
+        $validator->notEmpty('locale', 'limit');
         $validator->integer('limit');
         if (!$validator->isValid()) {
             return $response->withJson([
@@ -27,15 +28,19 @@ class PostController extends Controller
         } else {
             $limit = 15;
         }
+        $query = Post::query()
+            ->select(['id', 'title', 'locale', 'identifier', 'description', 'image', 'created_at', 'updated_at'])
+            ->orderBy('created_at', 'desc')
+            ->limit($limit);
+
+        if ($validator->getValue('locale') !== null) {
+            $query = $query
+                ->where('locale', '=', $validator->getValue('locale'));
+        }
         return $response->withJson([
             'success' => true,
             'data' => [
-                'posts' => Post::query()
-                    ->select(['id', 'title', 'description', 'image', 'created_at', 'updated_at'])
-                    ->orderBy('created_at', 'desc')
-                    ->limit($limit)
-                    ->get()
-                    ->toArray()
+                'posts' => $query->get()->toArray()
             ]
         ]);
     }
@@ -69,8 +74,8 @@ class PostController extends Controller
             ], 403);
         }
         $validator = new Validator($request->getParsedBody());
-        $validator->required('title', 'content', 'image');
-        $validator->notEmpty('title', 'content', 'image');
+        $validator->required('title', 'content', 'image', 'locale', 'identifier');
+        $validator->notEmpty('title', 'content', 'image', 'locale', 'identifier');
         $validator->url('image');
         if (!$validator->isValid()) {
             return $response->withJson([
@@ -86,6 +91,8 @@ class PostController extends Controller
         $post['image'] = $validator->getValue('image');
         $post['description'] = substr($validator->getValue('content'), 0, 150);
         $post['content'] = $validator->getValue('content');
+        $post['locale'] = $validator->getValue('locale');
+        $post['identifier'] = $validator->getValue('identifier');
         $post->user()->associate($session->getUserId());
         $post->save();
         return $response->withJson([
@@ -131,6 +138,13 @@ class PostController extends Controller
         $post['image'] = $validator->getValue('image');
         $post['description'] = substr($validator->getValue('content'), 0, 150);
         $post['content'] = $validator->getValue('content');
+
+        if ($validator->getValue('locale') != NULL) {
+            $post['locale'] = $validator->getValue('locale');
+        }
+        if ($validator->getValue('identifier') != NULL) {
+            $post['identifier'] = $validator->getValue('identifier');
+        }
         $post->save();
 
         return $response->withJson([
