@@ -67,12 +67,6 @@ class PostController extends Controller
 
     public function store(ServerRequestInterface $request, Response $response, Session $session)
     {
-        if (!$session->isAdmin()) {
-            return $response->withJson([
-                'success' => false,
-                'errors' => ['Forbidden']
-            ], 403);
-        }
         $validator = new Validator($request->getParsedBody());
         $validator->required('title', 'content', 'image', 'locale', 'identifier');
         $validator->notEmpty('title', 'content', 'image', 'locale', 'identifier');
@@ -105,12 +99,6 @@ class PostController extends Controller
 
     public function update($id, ServerRequestInterface $request, Response $response, Session $session)
     {
-        if (!$session->isAdmin()) {
-            return $response->withJson([
-                'success' => false,
-                'errors' => ['Forbidden']
-            ], 403);
-        }
         $validator = new Validator($request->getParsedBody());
         $validator->required('title', 'content', 'image');
         $validator->notEmpty('title', 'content', 'image');
@@ -154,12 +142,6 @@ class PostController extends Controller
 
     public function destroy($id, Response $response, Session $session)
     {
-        if (!$session->isAdmin()) {
-            return $response->withJson([
-                'success' => false,
-                'errors' => ['Forbidden']
-            ], 403);
-        }
         $this->loadDatabase();
         $post = Post::query()->find($id);
         if ($post == NULL) {

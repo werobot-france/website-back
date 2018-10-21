@@ -63,13 +63,6 @@ class MessageController extends Controller
 
     public function destroy($id, Response $response, Session $session)
     {
-        if (!$session->isAdmin()) {
-            return $response->withJson([
-                'success' => false,
-                'errors' => ['Forbidden']
-            ], 403);
-        }
-
         $this->loadDatabase();
         $post = Message::query()->find($id);
         if ($post == NULL) {
