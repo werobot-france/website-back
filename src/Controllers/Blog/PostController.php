@@ -29,7 +29,7 @@ class PostController extends Controller
             $limit = 15;
         }
         $query = Post::query()
-            ->select(['id', 'title', 'locale', 'identifier', 'description', 'image', 'created_at', 'updated_at'])
+            ->select(['id', 'title', 'locale', 'slug', 'identifier', 'description', 'image', 'created_at', 'updated_at'])
             ->orderBy('created_at', 'desc')
             ->limit($limit);
 
@@ -50,12 +50,15 @@ class PostController extends Controller
         $this->loadDatabase();
         $post = Post::query()->find($id);
         if ($post == NULL) {
+          $post = Post::query()->where('slug', '=', $id)->first();
+          if ($post == NULL) {
             return $response->withJson([
                 'success' => false,
                 'errors' => [
                     'Unknown post'
                 ]
             ], 404);
+          }
         }
         return $response->withJson([
             'success' => true,

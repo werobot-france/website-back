@@ -33,7 +33,7 @@ class PostSeeder extends AbstractSeed
             "https://static.wixstatic.com/media/4d79d8_e0a7ead3f2ce4f91b39c86dabccc0a0c~mv2_d_4032_2268_s_2.jpg/v1/fill/w_1452,h_817,al_c,q_90,usm_0.66_1.00_0.01/4d79d8_e0a7ead3f2ce4f91b39c86dabccc0a0c~mv2_d_4032_2268_s_2.jpg",
             "https://static.wixstatic.com/media/4d79d8_dda3fd87d3014b1dad42d15f30cdce6d~mv2_d_4032_2268_s_2.jpg/v1/fill/w_672,h_378,al_c,q_80,usm_0.66_1.00_0.01/4d79d8_dda3fd87d3014b1dad42d15f30cdce6d~mv2_d_4032_2268_s_2.jpg"
         ];
-        $markdown = "# hello world
+        $markdown = "## hello world
 
 Sunt bromiumes anhelare clemens, festus aususes.Primus impositio saepe convertams adelphis est.This pattern has only been attacked by a final sensor.
 Sunt bromiumes anhelare clemens, festus aususes.Primus impositio saepe convertams adelphis est.This pattern has only been attacked by a final sensor.
@@ -48,7 +48,7 @@ Sunt bromiumes anhelare clemens, festus aususes.Primus impositio saepe convertam
 Sunt bromiumes anhelare clemens, festus aususes.Primus impositio saepe convertams adelphis est.This pattern has only been attacked by a final sensor.
 Sunt bromiumes anhelare clemens, festus aususes.Primus impositio saepe convertams adelphis est.This pattern has only been attacked by a final sensor.
 
-## helo world			
+## helo world
 
 Sunt bromiumes anhelare clemens, festus aususes.Primus impositio saepe convertams adelphis est.This pattern has only been attacked by a final sensor.
 Sunt bromiumes anhelare clemens, festus aususes.Primus impositio saepe convertams adelphis est.
