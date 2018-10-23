@@ -26,6 +26,8 @@ $app->group('/message', function () use ($app) {
 $app->post('/contact', [\App\Controllers\ContactController::class, 'contact'])
     ->add(new \RKA\Middleware\IpAddress());
 
+$app->get('/photos', [\App\Controllers\PhotosController::class, 'photos']);
+
 $app->group('/auth', function (){
     $this->get('/login[/]', [\App\Controllers\Account\STAILEUController::class, 'getLogin']);
 
