@@ -11,7 +11,7 @@ class CORSMiddleware
     {
         $response = $response
             ->withHeader('Access-Control-Allow-Origin', '*')
-            ->withHeader('Access-Control-Allow-Methods', 'POST, PUT, GET, OPTIONS')
+            ->withHeader('Access-Control-Allow-Methods', 'POST, PUT, GET, OPTIONS, DELETE')
             ->withHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, Authorization');
         if ($request->getMethod() == "OPTIONS") {
             return $response->withJson(true);
