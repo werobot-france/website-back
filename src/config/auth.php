@@ -9,5 +9,8 @@ return [
     'jwt' => [
         'key' => getenv('JWT_KEY')
     ],
-    'master_api_key' => getenv('MASTER_API_KEY')
+    'master_api_key' => getenv('MASTER_API_KEY'),
+    'instagram' => [
+        'access_token' => getenv('INSTAGRAM_ACCESS_TOKEN')
+    ]
 ];

@@ -26,5 +26,8 @@ return [
     },
     \App\ReCaptcha::class => function (ContainerInterface $container) {
         return new \App\ReCaptcha($container->get('recaptcha')['private']);
+    },
+    \App\Instagram::class => function (ContainerInterface $container) {
+        return new \App\Instagram($container->get('instagram')['access_token']);
     }
 ];

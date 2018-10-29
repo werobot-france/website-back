@@ -1,6 +1,5 @@
 <?php
 $app->options('/{routes:.+}', [\App\Controllers\CORSController::class, 'allOptions']);
-//$app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', [\App\Controllers\CORSController::class, 'allOptions']);
 
 $app->add(new \App\Middlewares\CORSMiddleware());
 
@@ -37,3 +36,6 @@ $app->group('/auth', function (){
     $this->post('/execute[/]', [\App\Controllers\Account\STAILEUController::class, 'execute'])
         ->add(new \RKA\Middleware\IpAddress());
 });
+
+$app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', [\App\Controllers\CORSController::class, 'notFound']);
+
