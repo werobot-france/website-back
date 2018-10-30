@@ -84,8 +84,8 @@ Sunt bromiumes anhelare clemens, festus aususes.Primus impositio saepe convertam
                 'description' => $faker->text(190),
                 'image' => $faker->randomElement($images),
                 'content' => $markdown,
-                'created_at' => $faker->dateTime->format('Y-m-d H:i:s'),
-                'updated_at' => $faker->dateTime->format('Y-m-d H:i:s')
+                'created_at' => $faker->dateTimeThisDecade->format('Y-m-d H:i:s'),
+                'updated_at' => $faker->dateTimeThisDecade->format('Y-m-d H:i:s')
             ];
             if ($i % 2) {
                 $locale = false;
