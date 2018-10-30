@@ -32,7 +32,7 @@ class MessageController extends Controller
         return $response->withJson([
             'success' => true,
             'data' => [
-                'posts' => Message::query()
+                'messages' => Message::query()
                     ->orderBy('created_at', 'desc')
                     ->limit($limit)
                     ->get()
