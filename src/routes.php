@@ -30,7 +30,7 @@ $app->get('/photos', [\App\Controllers\PhotosController::class, 'photos']);
 $app->group('/auth', function (){
     $this->get('/login[/]', [\App\Controllers\Account\STAILEUController::class, 'getLogin']);
 
-    $this->get('info', [\App\Controllers\Account\STAILEUController::class, 'getInfo'])
+    $this->get('/info', [\App\Controllers\Account\STAILEUController::class, 'getInfo'])
         ->add(new \App\Middlewares\JWTMiddleware($this->getContainer()));
 
     $this->post('/execute[/]', [\App\Controllers\Account\STAILEUController::class, 'execute'])
