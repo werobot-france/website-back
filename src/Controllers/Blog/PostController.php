@@ -71,7 +71,7 @@ class PostController extends Controller
     public function store(ServerRequestInterface $request, Response $response, Session $session)
     {
         $validator = new Validator($request->getParsedBody());
-        $validator->required('title', 'content', 'image', 'locale', 'identifier');
+        $validator->required('title', 'content', 'image', 'locale');
         $validator->notEmpty('title', 'content', 'image', 'locale', 'identifier');
         $validator->url('image');
         if (!$validator->isValid()) {
@@ -89,8 +89,10 @@ class PostController extends Controller
         $post['description'] = substr($validator->getValue('content'), 0, 150);
         $post['content'] = $validator->getValue('content');
         $post['locale'] = $validator->getValue('locale');
-        $post['identifier'] = $validator->getValue('identifier');
-        $post->user()->associate($session->getUserId());
+        $post['identifier'] = $validator->getValue('identifier') == NULL ? uniqid() : $validator->getValue('identifier');
+        if (isset($session->getData()['user']['id'])) {
+            $post->user()->associate($session->getUserId());
+        }
         $post->save();
         return $response->withJson([
             'success' => true,
@@ -129,7 +131,6 @@ class PostController extends Controller
         $post['image'] = $validator->getValue('image');
         $post['description'] = substr($validator->getValue('content'), 0, 150);
         $post['content'] = $validator->getValue('content');
-
         if ($validator->getValue('locale') != NULL) {
             $post['locale'] = $validator->getValue('locale');
         }

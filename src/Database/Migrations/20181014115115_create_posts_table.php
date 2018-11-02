@@ -1,6 +1,5 @@
 <?php
 
-
 use Phinx\Migration\AbstractMigration;
 
 class CreatePostsTable extends AbstractMigration
@@ -38,7 +37,7 @@ class CreatePostsTable extends AbstractMigration
             ->addColumn('slug', 'string')
             ->addColumn('image', 'text')
             ->addColumn('locale', 'string')
-            ->addColumn('identifier', 'string')
+            ->addColumn('identifier', 'string', ['null' => true])
             ->addColumn('description', 'string', ['null' => true])
             ->addColumn('user_id', 'string', ['null' => true])
             ->addColumn('created_at', 'datetime', ['null' => true])
