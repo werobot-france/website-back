@@ -15,7 +15,7 @@ class PostController extends Controller
     {
         $this->loadDatabase();
         $validator = new Validator($request->getQueryParams());
-        $validator->notEmpty('locale', 'limit');
+        $validator->notEmpty('locale', 'limit', 'identifier');
         $validator->integer('limit');
         if (!$validator->isValid()) {
             return $response->withJson([
@@ -36,6 +36,10 @@ class PostController extends Controller
         if ($validator->getValue('locale') !== null) {
             $query = $query
                 ->where('locale', '=', $validator->getValue('locale'));
+        }
+        if ($validator->getValue('identifier') !== null) {
+            $query = $query
+                ->where('identifier', '=', $validator->getValue('identifier'));
         }
         return $response->withJson([
             'success' => true,
