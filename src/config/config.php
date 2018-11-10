@@ -6,5 +6,9 @@ return [
 
     'recaptcha' => [
         'private' => getenv('RECAPTCHA_PRIVATE')
+    ],
+    'image_upload' => [
+        'destination_path' => getenv('IMAGE_UPLOAD_DESTINATION_PATH'),
+        'public_base_path' => getenv('IMAGE_UPLOAD_PUBLIC_BASE_URL')
     ]
 ];

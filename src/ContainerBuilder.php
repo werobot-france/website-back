@@ -15,6 +15,9 @@ class ContainerBuilder
         $containerBuilder->addDefinitions(__DIR__ . '/config/database.php');
         $containerBuilder->addDefinitions(__DIR__ . '/config/auth.php');
         $containerBuilder->addDefinitions(__DIR__ . '/config/containers.php');
+        $containerBuilder->addDefinitions([
+            'root_path' => dirname(__DIR__)
+        ]);
 
         return $containerBuilder;
     }

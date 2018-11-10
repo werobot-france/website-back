@@ -27,6 +27,11 @@ $app->post('/contact', [\App\Controllers\ContactController::class, 'contact'])
 
 $app->get('/photos', [\App\Controllers\PhotosController::class, 'photos']);
 
+$app->post('/image-upload', [\App\Controllers\ImageUpload::class, 'upload'])
+    ->add(new \App\Middlewares\CORSMiddleware())
+    ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
+
+
 $app->group('/auth', function (){
     $this->get('/login[/]', [\App\Controllers\Account\STAILEUController::class, 'getLogin']);
 
