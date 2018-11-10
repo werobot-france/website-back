@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Controllers\Blog;
+namespace App\Controllers;
 
 use App\Auth\Session;
-use App\Controllers\Controller;
 use App\Models\Post;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Http\Response;
@@ -106,7 +105,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function update($id, ServerRequestInterface $request, Response $response, Session $session)
+    public function update($id, ServerRequestInterface $request, Response $response)
     {
         $validator = new Validator($request->getParsedBody());
         $validator->required('title', 'content', 'image');
@@ -148,7 +147,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function destroy($id, Response $response, Session $session)
+    public function destroy($id, Response $response)
     {
         $this->loadDatabase();
         $post = Post::query()->find($id);

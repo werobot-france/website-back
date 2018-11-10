@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Controllers\Account;
+namespace App\Controllers;
 
 use App\Auth\Session;
-use App\Controllers\Controller;
 use App\Models\User;
 use Carbon\Carbon;
 use Psr\Http\Message\ServerRequestInterface;
