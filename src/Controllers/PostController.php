@@ -75,8 +75,9 @@ class PostController extends Controller
     {
         $validator = new Validator($request->getParsedBody());
         $validator->required('title', 'content', 'image', 'locale');
-        $validator->notEmpty('title', 'content', 'image', 'locale', 'identifier');
+        $validator->notEmpty('title', 'content', 'image', 'locale', 'identifier', 'created_at');
         $validator->url('image');
+        $validator->dateTime('created_at');
         if (!$validator->isValid()) {
             return $response->withJson([
                 'success' => false,
@@ -93,6 +94,7 @@ class PostController extends Controller
         $post['content'] = $validator->getValue('content');
         $post['locale'] = $validator->getValue('locale');
         $post['identifier'] = $validator->getValue('identifier') == NULL ? uniqid() : $validator->getValue('identifier');
+        $post['created_at'] = $validator->getValue('created_at');
         if (isset($session->getData()['user']['id'])) {
             $post->user()->associate($session->getUserId());
         }
@@ -109,8 +111,9 @@ class PostController extends Controller
     {
         $validator = new Validator($request->getParsedBody());
         $validator->required('title', 'content', 'image');
-        $validator->notEmpty('title', 'content', 'image');
+        $validator->notEmpty('title', 'content', 'image', 'created_at');
         $validator->url('image');
+        $validator->dateTime('created_at');
         if (!$validator->isValid()) {
             return $response->withJson([
                 'success' => false,
@@ -134,6 +137,7 @@ class PostController extends Controller
         $post['image'] = $validator->getValue('image');
         $post['description'] = substr($validator->getValue('content'), 0, 150);
         $post['content'] = $validator->getValue('content');
+        $post['created_at'] = $validator->getValue('created_at');
         if ($validator->getValue('locale') != NULL) {
             $post['locale'] = $validator->getValue('locale');
         }
