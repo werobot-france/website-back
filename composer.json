@@ -26,6 +26,9 @@
         "lefuturiste/validator": "^1.0",
         "stan-tab-corp/staileu-accounts": "^3.1",
         "akrabat/ip-address-middleware": "^1.0",
-        "firebase/php-jwt": "^5.0"
+        "firebase/php-jwt": "^5.0",
+        "php-http/guzzle6-adapter": "^1.1",
+        "php-http/curl-client": "^1.7",
+        "guzzlehttp/psr7": "^1.4"
     }
 }
