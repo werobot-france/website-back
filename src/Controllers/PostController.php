@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Auth\Session;
 use App\Models\Post;
+use Carbon\Carbon;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Http\Response;
 use Validator\Validator;
@@ -75,7 +76,7 @@ class PostController extends Controller
     {
         $validator = new Validator($request->getParsedBody());
         $validator->required('title', 'content', 'image', 'locale');
-        $validator->notEmpty('title', 'content', 'image', 'locale', 'identifier', 'created_at');
+        $validator->notEmpty('title', 'description', 'content', 'image', 'locale', 'identifier', 'created_at');
         $validator->url('image');
         $validator->dateTime('created_at');
         if (!$validator->isValid()) {
@@ -90,11 +91,11 @@ class PostController extends Controller
         $post['title'] = $validator->getValue('title');
         $post['slug'] = str_slug($validator->getValue('title'));
         $post['image'] = $validator->getValue('image');
-        $post['description'] = substr($validator->getValue('content'), 0, 150);
+        $post['description'] = $validator->getValue('description') == NULL ? substr($validator->getValue('content'), 0, 150) : $validator->getValue('description');
         $post['content'] = $validator->getValue('content');
         $post['locale'] = $validator->getValue('locale');
         $post['identifier'] = $validator->getValue('identifier') == NULL ? uniqid() : $validator->getValue('identifier');
-        $post['created_at'] = $validator->getValue('created_at');
+        $post['created_at'] = $validator->getValue('created_at') == NULL ? (new Carbon())->toDateTimeString() : $validator->getValue('created_at');
         if (isset($session->getData()['user']['id'])) {
             $post->user()->associate($session->getUserId());
         }
@@ -111,7 +112,7 @@ class PostController extends Controller
     {
         $validator = new Validator($request->getParsedBody());
         $validator->required('title', 'content', 'image');
-        $validator->notEmpty('title', 'content', 'image', 'created_at');
+        $validator->notEmpty('title', 'description', 'content', 'image', 'created_at');
         $validator->url('image');
         $validator->dateTime('created_at');
         if (!$validator->isValid()) {
@@ -135,9 +136,9 @@ class PostController extends Controller
         $post['title'] = $validator->getValue('title');
         $post['slug'] = str_slug($validator->getValue('title'));
         $post['image'] = $validator->getValue('image');
-        $post['description'] = substr($validator->getValue('content'), 0, 150);
+        $post['description'] = $validator->getValue('description') == NULL ? substr($validator->getValue('content'), 0, 150) : $validator->getValue('description');
         $post['content'] = $validator->getValue('content');
-        $post['created_at'] = $validator->getValue('created_at');
+        $post['created_at'] = $validator->getValue('created_at') == NULL ? (new Carbon())->toDateTimeString() : $validator->getValue('created_at');
         if ($validator->getValue('locale') != NULL) {
             $post['locale'] = $validator->getValue('locale');
         }
