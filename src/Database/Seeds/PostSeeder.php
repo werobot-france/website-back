@@ -62,13 +62,13 @@ Sunt bromiumes anhelare clemens, festus aususes.Primus impositio saepe convertam
         $posts = [];
 
         $identifiers = [];
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $identifiers[] = uniqid();
         }
 
         $identifier = 0;
         $locale = false;
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             if ($locale) {
                 $locale = 'fr';
             } else {
@@ -84,8 +84,8 @@ Sunt bromiumes anhelare clemens, festus aususes.Primus impositio saepe convertam
                 'description' => $faker->text(190),
                 'image' => $faker->randomElement($images),
                 'content' => $markdown,
-                'created_at' => $faker->dateTimeThisDecade->format('Y-m-d H:i:s'),
-                'updated_at' => $faker->dateTimeThisDecade->format('Y-m-d H:i:s')
+                'created_at' => $faker->dateTimeThisYear->format('Y-m-d H:i:s'),
+                'updated_at' => $faker->dateTimeThisYear->format('Y-m-d H:i:s')
             ];
             if ($i % 2) {
                 $locale = false;

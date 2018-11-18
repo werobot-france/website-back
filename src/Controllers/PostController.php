@@ -11,6 +11,40 @@ use Validator\Validator;
 
 class PostController extends Controller
 {
+    public function getDates(ServerRequestInterface $request, Response $response)
+    {
+        $this->loadDatabase();
+        $validator = new Validator($request->getQueryParams());
+        $validator->notEmpty('locale');
+        if (!$validator->isValid()) {
+            return $response->withJson([
+                'success' => false,
+                'errors' => $validator->getErrors()
+            ], 400);
+        }
+        $query = Post::query()
+            ->select(['id', 'title', 'locale', 'slug', 'identifier', 'description', 'image', 'created_at', 'updated_at'])
+            ->orderBy('created_at', 'desc');
+
+        if ($validator->getValue('locale') !== null) {
+            $query = $query
+                ->where('locale', '=', $validator->getValue('locale'));
+        }
+        $posts = $query->get()->toArray();
+        $categoriesDates = [];
+        foreach ($posts as $post) {
+            $carbon = Carbon::createFromTimeString($post['created_at']);
+            $year = $carbon->year;
+            $month = $carbon->month;
+            $hash = $year . '-' . $month;
+            $categoriesDates[$hash][] = $post;
+        }
+        return $response->withJson([
+            'success' => true,
+            'data' => $categoriesDates
+        ]);
+    }
+
     public function getMany(ServerRequestInterface $request, Response $response)
     {
         $this->loadDatabase();

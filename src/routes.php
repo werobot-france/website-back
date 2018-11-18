@@ -7,6 +7,7 @@ $app->get('/', [\App\Controllers\DefaultController::class, 'home']);
 
 $app->group('/post', function () use ($app) {
    $this->get('[/]', [\App\Controllers\PostController::class, 'getMany']);
+   $this->get('/dates[/]', [\App\Controllers\PostController::class, 'getDates']);
    $this->get('/{id}[/]', [\App\Controllers\PostController::class, 'getOne']);
    $this->post('[/]', [\App\Controllers\PostController::class, 'store'])
        ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
@@ -30,7 +31,6 @@ $app->get('/photos', [\App\Controllers\PhotosController::class, 'photos']);
 $app->post('/image-upload', [\App\Controllers\ImageUpload::class, 'upload'])
     ->add(new \App\Middlewares\CORSMiddleware())
     ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
-
 
 $app->group('/auth', function (){
     $this->get('/login[/]', [\App\Controllers\STAILEUController::class, 'getLogin']);
