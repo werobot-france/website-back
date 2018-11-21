@@ -3,13 +3,14 @@
 namespace App\Controllers;
 
 use App\Instagram;
+use Lefuturiste\LocalStorage\LocalStorage;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Http\Response;
 use Validator\Validator;
 
 class PhotosController extends Controller
 {
-    public function photos(ServerRequestInterface $request, Response $response, Instagram $instagram)
+    public function photos(ServerRequestInterface $request, Response $response, Instagram $instagram, LocalStorage $localStorage)
     {
         $validator = new Validator($request->getQueryParams());
         $validator->notEmpty('limit');
@@ -21,7 +22,13 @@ class PhotosController extends Controller
             ], 400);
         }
         $limit = $validator->getValue('limit');
-        $photos = $instagram->getMedias();
+        if (!$localStorage->exist('instagram.medias')) {
+            $photos = $instagram->getMedias();
+            $localStorage->set('instagram.medias', $photos);
+            $localStorage->save();
+        } else {
+            $photos = $localStorage->get('instagram.medias');
+        }
         return $response->withJson([
             'success' => true,
             'data' => [

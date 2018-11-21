@@ -29,6 +29,7 @@
         "firebase/php-jwt": "^5.0",
         "php-http/guzzle6-adapter": "^1.1",
         "php-http/curl-client": "^1.7",
-        "guzzlehttp/psr7": "^1.4"
+        "guzzlehttp/psr7": "^1.4",
+        "lefuturiste/localstorage": "^1.1"
     }
 }

@@ -5,13 +5,14 @@ namespace App\Controllers;
 use App\Auth\Session;
 use App\Models\Post;
 use Carbon\Carbon;
+use Lefuturiste\LocalStorage\LocalStorage;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Http\Response;
 use Validator\Validator;
 
 class PostController extends Controller
 {
-    public function getDates(ServerRequestInterface $request, Response $response)
+    public function getDates(ServerRequestInterface $request, Response $response, LocalStorage $localStorage)
     {
         $this->loadDatabase();
         $validator = new Validator($request->getQueryParams());
@@ -22,22 +23,29 @@ class PostController extends Controller
                 'errors' => $validator->getErrors()
             ], 400);
         }
-        $query = Post::query()
-            ->select(['id', 'title', 'locale', 'slug', 'identifier', 'description', 'image', 'created_at', 'updated_at'])
-            ->orderBy('created_at', 'desc');
+        $locale = $validator->getValue('locale');
+        if ($localStorage->exist("posts-by-dates.locale.{$locale}")) {
+            $categoriesDates = $localStorage->get("posts-by-dates.locale.{$locale}");
+        } else {
+            $query = Post::query()
+                ->select(['id', 'title', 'locale', 'slug', 'identifier', 'description', 'image', 'created_at', 'updated_at'])
+                ->orderBy('created_at', 'desc');
 
-        if ($validator->getValue('locale') !== null) {
-            $query = $query
-                ->where('locale', '=', $validator->getValue('locale'));
-        }
-        $posts = $query->get()->toArray();
-        $categoriesDates = [];
-        foreach ($posts as $post) {
-            $carbon = Carbon::createFromTimeString($post['created_at']);
-            $year = $carbon->year;
-            $month = $carbon->month;
-            $hash = $year . '-' . $month;
-            $categoriesDates[$hash][] = $post;
+            if ($locale !== null) {
+                $query = $query
+                    ->where('locale', '=', $locale);
+            }
+            $posts = $query->get()->toArray();
+            $categoriesDates = [];
+            foreach ($posts as $post) {
+                $carbon = Carbon::createFromTimeString($post['created_at']);
+                $year = $carbon->year;
+                $month = $carbon->month;
+                $hash = $year . '-' . $month;
+                $categoriesDates[$hash][] = $post;
+            }
+            $localStorage->set("posts-by-dates.locale.{$locale}", $categoriesDates);
+            $localStorage->write();
         }
         return $response->withJson([
             'success' => true,
