@@ -57,15 +57,14 @@ class PostController extends Controller
                 'errors' => $validator->getErrors()
             ], 400);
         }
-        if ($validator->getValue('limit') != NULL) {
-            $limit = $validator->getValue('limit');
-        } else {
-            $limit = 15;
-        }
+
         $query = Post::query()
             ->select(['id', 'title', 'locale', 'slug', 'identifier', 'description', 'image', 'created_at', 'updated_at'])
-            ->orderBy('created_at', 'desc')
-            ->limit($limit);
+            ->orderBy('created_at', 'desc');
+
+        if ($validator->getValue('limit') != NULL) {
+            $query = $query->limit($validator->getValue('limit'));
+        }
 
         if ($validator->getValue('locale') !== null) {
             $query = $query
