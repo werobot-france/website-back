@@ -17,6 +17,9 @@ $app->group('/post', function () use ($app) {
        ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
 });
 
+$app->get('/cache/clear', [\App\Controllers\CacheController::class, 'clear'])
+    ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
+
 $app->group('/message', function () use ($app) {
     $this->get('[/]', [\App\Controllers\MessageController::class, 'getMany']);
     $this->get('/{id}[/]', [\App\Controllers\MessageController::class, 'getOne']);
