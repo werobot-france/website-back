@@ -22,13 +22,13 @@ class PhotosController extends Controller
             ], 400);
         }
         $limit = $validator->getValue('limit');
-        if (!$localStorage->exist('instagram.medias')) {
-            $photos = $instagram->getMedias();
-            $localStorage->set('instagram.medias', $photos);
-            $localStorage->save();
-        } else {
-            $photos = $localStorage->get('instagram.medias');
-        }
+        $photos = $instagram->getMedias();
+//        if (!$localStorage->exist('instagram.medias')) {
+//            $localStorage->set('instagram.medias', $photos);
+//            $localStorage->save();
+//        } else {
+//            $photos = $localStorage->get('instagram.medias');
+//        }
         return $response->withJson([
             'success' => true,
             'data' => [
