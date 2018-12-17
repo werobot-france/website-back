@@ -5,6 +5,11 @@ $app->add(new \App\Middlewares\CORSMiddleware());
 
 $app->get('/', [\App\Controllers\DefaultController::class, 'home']);
 
+$app->group('/backup', function () {
+  $this->get('[/]', [\App\Controllers\BackupController::class, 'getMany']);
+  $this->post('[/]', [\App\Controllers\BackupController::class, 'create']);
+})->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
+
 $app->group('/post', function () use ($app) {
    $this->get('[/]', [\App\Controllers\PostController::class, 'getMany']);
    $this->get('/dates[/]', [\App\Controllers\PostController::class, 'getDates']);
