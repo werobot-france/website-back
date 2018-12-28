@@ -30,6 +30,7 @@
         "php-http/guzzle6-adapter": "^1.1",
         "php-http/curl-client": "^1.7",
         "guzzlehttp/psr7": "^1.4",
-        "lefuturiste/localstorage": "^1.1"
+        "lefuturiste/localstorage": "^1.1",
+        "nopjmp/discord-webhooks": "^0.3.1"
     }
 }

@@ -10,5 +10,6 @@ return [
     'image_upload' => [
         'destination_path' => getenv('IMAGE_UPLOAD_DESTINATION_PATH'),
         'public_base_path' => getenv('IMAGE_UPLOAD_PUBLIC_BASE_URL')
-    ]
+    ],
+    'contact_message_discord_webhook' => getenv('CONTACT_MESSAGE_DISCORD_WEBHOOK')
 ];

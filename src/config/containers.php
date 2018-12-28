@@ -32,5 +32,8 @@ return [
     },
     \Lefuturiste\LocalStorage\LocalStorage::class => function () {
         return new \Lefuturiste\LocalStorage\LocalStorage(dirname(dirname(__DIR__)) . '/tmp/local_storage.json');
+    },
+    \DiscordWebhooks\Client::class => function (ContainerInterface $container) {
+        return new \DiscordWebhooks\Client($container->get('contact_message_discord_webhook'));
     }
 ];
