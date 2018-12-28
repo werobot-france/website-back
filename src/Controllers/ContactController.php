@@ -61,28 +61,6 @@ class ContactController extends Controller
                 ->field('Ip address', $message['author_ip'])
             )->send();
 
-        //send a mailgun email
-//        $mailGunClient = $this->container->get(Mailgun::class);
-//        $mailGunClient->messages()->send('lefuturiste.fr', [
-//            'from' => "We Robot Contact Form <contact-form@werobot.fr>",
-//            'to' => $this->container->get('mailgun')['to'],
-//            'subject' => $message['subject'] . ' - Contact Form',
-//            'text' => `
-//            Hey!
-//            There was a new message sent from the WeRobot's wesite.
-//
-//            from: {$message['author_name']} <{$message['author_email']}>
-//            ip: {$message['author_ip']}
-//            user-agent: {$message['author_user_agent']}
-//            subject: {$message['subject']}
-//            ----- TEXT BEGIN -----
-//
-//            {$message['content']}
-//
-//            ----- TEXT   END -----
-//            `
-//        ]);
-
         return $response->withJson([
             'success' => true
         ]);
