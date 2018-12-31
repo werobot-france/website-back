@@ -1,3 +1,6 @@
 # Werobot web api
 
-Work in progress...
+## 30 december 2018: gallery feature
+
+- images ressource
+- pagination with query string when get many

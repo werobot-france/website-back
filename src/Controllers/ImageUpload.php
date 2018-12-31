@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\ImageHelper;
+use App\Models\Image;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Http\Response;
@@ -22,25 +24,14 @@ class ImageUpload extends Controller
             ], 400);
         }
         $destinationPath = $this->container->get('root_path') . '/' . $this->container->get('image_upload')['destination_path'];
+        $id = uniqid();
         if (!isset($request->getUploadedFiles()['image'])) {
+            // upload file from a url
             if (is_string($validator->getValue('image')) && filter_var($validator->getValue('image'), FILTER_VALIDATE_URL)) {
                 $httpResponse = (new Client())
                     ->get($validator->getValue('image'));
-                $contentType = $httpResponse->getHeader('Content-Type')[0];
-                $ext = '';
-                switch ($contentType) {
-                    case 'image/png':
-                        $ext = 'png';
-                        break;
-
-                    case 'image/jpeg':
-                        $ext = 'jpg';
-                        break;
-
-                    case 'image/gif':
-                        $ext = 'gif';
-                        break;
-                }
+                $type = $httpResponse->getHeader('Content-Type')[0];
+                $ext = ImageHelper::MIMETypeToExtension($type);
                 if ($ext == '') {
                     return $response->withJson([
                         'success' => false,
@@ -49,9 +40,8 @@ class ImageUpload extends Controller
                         ]
                     ], 400);
                 }
-                $fileName = uniqid() . '.' . $ext;
-                file_put_contents($destinationPath . '/' . $fileName, $httpResponse->getBody()->getContents());
-                file_get_contents($validator->getValue('image'));
+                mkdir($destinationPath . '/' . $id);
+                file_put_contents($destinationPath . '/' . $id . '/original.' . $ext, $httpResponse->getBody()->getContents());
             } else {
                 return $response->withJson([
                     'success' => false,
@@ -71,26 +61,26 @@ class ImageUpload extends Controller
                     ]
                 ], 400);
             }
-            $fileName = uniqid() . '.' . $this->MIMETypeToExtension($uploadedFile->getClientMediaType());
-            $uploadedFile->moveTo(
-                $destinationPath . '/' . $fileName
-            );
+            $type = $uploadedFile->getClientMediaType()[0];
+            $ext = ImageHelper::MIMETypeToExtension($type);
+            mkdir($destinationPath . '/' . $id);
+            $uploadedFile->moveTo($destinationPath . '/' . $id . '/original.' . $ext);
         }
 
+        $this->loadDatabase();
+        $image = new Image();
+        $image['id'] = $id;
+        $image['extension'] = $ext;
+        $image['type'] = $type;
+        $image->save();
+
+        ImageHelper::import($destinationPath . '/' . $id . '/original.' . $ext);
         return $response->withJson([
             'success' => true,
             'data' => [
-                'url' => $this->container->get('image_upload')['public_base_path'] . '/' . $fileName
+                'id' => $id,
+                'url' => $this->container->get('image_upload')['public_base_path'] . '/' . $id . '/original.' . $ext
             ]
         ]);
-    }
-
-    public function MIMETypeToExtension(string $MIMEType): string
-    {
-        return [
-            'image/jpeg' => 'jpg',
-            'image/gif' => 'gif',
-            'image/png' => 'png'
-        ][$MIMEType];
     }
 }

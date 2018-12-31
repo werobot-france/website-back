@@ -37,6 +37,14 @@ $app->post('/contact', [\App\Controllers\ContactController::class, 'contact'])
 
 $app->get('/photos', [\App\Controllers\PhotosController::class, 'photos']);
 
+$app->group('/image', function () {
+    $this->get('[/]', [\App\Controllers\ImageController::class, 'getMany']);
+    $this->get('/{id}[/]', [\App\Controllers\ImageController::class, 'getOne']);
+    $this->get('/{id}/display[/]', [\App\Controllers\ImageController::class, 'display']);
+    $this->put('/{id}[/]', [\App\Controllers\ImageController::class, 'update']);
+    $this->delete('/{id}[/]', [\App\Controllers\ImageController::class, 'destroy']);
+})->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
+
 //$app->group('/oauth', function () {
 //    $this->get('/twitter/authorize', [TwitterController::class]);
 //    $this->get('/facebook/authorize');
