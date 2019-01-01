@@ -9,10 +9,7 @@ class ImageHelper {
     {
         // generate 3 differents size in a folder
         $image = new ImageResize($absolutePath);
-        $image->quality_jpg = 100;
-        $image->quality_png = 100;
-        $image->quality_truecolor = true;
-        $image->interlace = false;
+        $image->gamma(false);
         $image->scale(75);
         $image->save(str_replace('original', '75', $absolutePath));
         $image->scale(50);
@@ -21,12 +18,13 @@ class ImageHelper {
         $image->save(str_replace('original', '25', $absolutePath));
     }
 
-    public static function MIMETypeToExtension(string $MIMEType): string
+    public static function MIMETypeToExtension(string $MIMEType)
     {
-        return [
+        $attrs = [
             'image/jpeg' => 'jpg',
             'image/gif' => 'gif',
             'image/png' => 'png'
-        ][$MIMEType];
+        ];
+        return isset($attrs[$MIMEType]) ? $attrs[$MIMEType] : NULL;
     }
 }

@@ -14,6 +14,7 @@ class ImageUpload extends Controller
 {
     public function upload(ServerRequestInterface $request, Response $response)
     {
+        // TODO: check for an existing hash in the database
         $validator = new Validator($request->getUploadedFiles() == [] ? $request->getParsedBody() : $request->getUploadedFiles() );
         $validator->required('image');
         $validator->notEmpty('image');
@@ -41,6 +42,7 @@ class ImageUpload extends Controller
                     ], 400);
                 }
                 mkdir($destinationPath . '/' . $id);
+                $hash = hash('sha256', $httpResponse->getBody()->getContents());
                 file_put_contents($destinationPath . '/' . $id . '/original.' . $ext, $httpResponse->getBody()->getContents());
             } else {
                 return $response->withJson([
@@ -61,9 +63,10 @@ class ImageUpload extends Controller
                     ]
                 ], 400);
             }
-            $type = $uploadedFile->getClientMediaType()[0];
+            $type = $uploadedFile->getClientMediaType();
             $ext = ImageHelper::MIMETypeToExtension($type);
             mkdir($destinationPath . '/' . $id);
+            $hash = hash('sha256', $uploadedFile->getStream()->getContents());
             $uploadedFile->moveTo($destinationPath . '/' . $id . '/original.' . $ext);
         }
 
@@ -72,6 +75,7 @@ class ImageUpload extends Controller
         $image['id'] = $id;
         $image['extension'] = $ext;
         $image['type'] = $type;
+        $image['hash'] = $hash;
         $image->save();
 
         ImageHelper::import($destinationPath . '/' . $id . '/original.' . $ext);

@@ -29,7 +29,9 @@ class ImageController extends Controller
         return $response->withJson([
             'success' => true,
             'data' => [
+                'image_public_path' => $this->container->get('image_upload')['public_base_path'],
                 'pagination' => [
+                    'total_page' => $pager->getNbPages(),
                     'per_page' => $maxPerPage,
                     'result_count' => $resultCount,
                     'current_page' => $currentPage,
