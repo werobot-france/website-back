@@ -152,7 +152,6 @@ class PostController extends Controller
     public function update($id, ServerRequestInterface $request, Response $response)
     {
         $validator = new Validator($request->getParsedBody());
-        $validator->required('title', 'content', 'image');
         $validator->notEmpty('title', 'description', 'content', 'image', 'created_at');
         $validator->url('image');
         $validator->dateTime('created_at');
@@ -174,11 +173,11 @@ class PostController extends Controller
             ], 404);
         }
 
-        $post['title'] = $validator->getValue('title');
-        $post['slug'] = str_slug($validator->getValue('title'));
-        $post['image'] = $validator->getValue('image');
-        $post['description'] = $validator->getValue('description') == NULL ? substr($validator->getValue('content'), 0, 150) : $validator->getValue('description');
-        $post['content'] = $validator->getValue('content');
+        $post['title'] = $validator->getValue('title') === NULL ? $post['title'] : $validator->getValue('title');
+        $post['slug'] = $validator->getValue('title') === NULL ? $post['slug'] : str_slug($validator->getValue('title'));
+        $post['image'] = $validator->getValue('image') === NULL ? $post['image'] : $validator->getValue('image');
+        $post['description'] = $validator->getValue('content') === NULL ? $post['description'] : $validator->getValue('description') == NULL ? substr($validator->getValue('content'), 0, 150) : $validator->getValue('description');
+        $post['content'] = $validator->getValue('content') === NULL ? $post['content'] : $validator->getValue('content');
         $post['created_at'] = $validator->getValue('created_at') == NULL ? $post['created_at'] : $validator->getValue('created_at');
         if ($validator->getValue('locale') != NULL) {
             $post['locale'] = $validator->getValue('locale');
