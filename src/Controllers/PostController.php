@@ -179,7 +179,7 @@ class PostController extends Controller
         $post['image'] = $validator->getValue('image');
         $post['description'] = $validator->getValue('description') == NULL ? substr($validator->getValue('content'), 0, 150) : $validator->getValue('description');
         $post['content'] = $validator->getValue('content');
-        $post['created_at'] = $validator->getValue('created_at') == NULL ? (new Carbon())->toDateTimeString() : $validator->getValue('created_at');
+        $post['created_at'] = $validator->getValue('created_at') == NULL ? $post['created_at'] : $validator->getValue('created_at');
         if ($validator->getValue('locale') != NULL) {
             $post['locale'] = $validator->getValue('locale');
         }
