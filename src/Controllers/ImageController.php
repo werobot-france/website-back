@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Image;
+use Carbon\Carbon;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Pagerfanta;
 use Psr\Http\Message\ServerRequestInterface;
@@ -99,7 +100,8 @@ class ImageController extends Controller
     public function update($id, ServerRequestInterface $request, Response $response)
     {
         $validator = new Validator($request->getParsedBody());
-        $validator->notEmpty('caption');
+        $validator->notEmpty('caption', 'created_at');
+        $validator->dateTime('created_at');
         if (!$validator->isValid()) {
             return $response->withJson([
                 'success' => false,
@@ -115,8 +117,12 @@ class ImageController extends Controller
 
         if ($validator->getValue('caption') !== NULL) {
             $image['caption'] = $validator->getValue('caption');
-            $image->save();
         }
+        if ($validator->getValue('created_at') !== NULL) {
+            $image['created_at'] = $validator->getValue('created_at');
+            $image['updated_at'] = Carbon::now();
+        }
+        $image->save();
 
         return $response->withJson([
             'success' => true
