@@ -14,7 +14,10 @@ class ImageController extends Controller
     public function getMany(ServerRequestInterface $request, Response $response)
     {
         $this->loadDatabase();
-        $images = Image::query()->orderBy('id', 'DESC')->get()->toArray();
+        $images = Image::query()
+            ->select(['id', 'type', 'extension', 'created_at', 'caption'])
+            ->orderBy('created_at', 'DESC')
+            ->get()->toArray();
         $adapter = new ArrayAdapter($images);
         $pager = new Pagerfanta($adapter);
 
