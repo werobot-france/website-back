@@ -1,5 +1,5 @@
 FROM debian
-LABEL maintainer="spamfree@matthieubessat.fr"
+LABEL maintainer="contact@lefuturiste.fr"
 ADD . /app
 WORKDIR /app
 RUN apt-get update && apt-get -y upgrade
