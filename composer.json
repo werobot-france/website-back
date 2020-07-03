@@ -33,6 +33,6 @@
         "lefuturiste/localstorage": "^1.1",
         "nopjmp/discord-webhooks": "^0.3.1",
         "pagerfanta/pagerfanta": "^2.0",
-        "gumlet/php-image-resize": "^1.9"
+        "raiym/instagram-php-scraper": "^0.9.11"
     }
 }
