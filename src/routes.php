@@ -13,6 +13,7 @@ $app->group('/backup', function () {
 
 $app->group('/post', function () use ($app) {
     $this->get('[/]', [\App\Controllers\PostController::class, 'getMany']);
+    $this->get('/years[/]', [\App\Controllers\PostController::class, 'getYears']);
     $this->get('/dates[/]', [\App\Controllers\PostController::class, 'getDates']);
     $this->get('/{id}[/]', [\App\Controllers\PostController::class, 'getOne']);
     $this->post('[/]', [\App\Controllers\PostController::class, 'store'])
@@ -56,6 +57,13 @@ $app->post('/image-upload', [\App\Controllers\ImageUpload::class, 'upload'])
     ->add(new \App\Middlewares\CORSMiddleware())
     ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
 
+
+$app->group('/google-photos', function () {
+    $this->get('/albums[/]', [\App\Controllers\GoogleController::class, 'getAllAlbums']);
+    //$this->get('/shared-albums[/]', [\App\Controllers\GoogleController::class, 'getSharedAlbums']);
+    $this->get('/album/{id}[/]', [\App\Controllers\GoogleController::class, 'getAlbum']);
+})->add(new \App\Middlewares\JWTMiddleware($app->getContainer()))->add(new \Slim\Middleware\Session());
+
 $app->group('/auth', function () {
     $this->get('/login[/]', [\App\Controllers\STAILEUController::class, 'getLogin']);
 
@@ -64,6 +72,12 @@ $app->group('/auth', function () {
 
     $this->post('/execute[/]', [\App\Controllers\STAILEUController::class, 'execute'])
         ->add(new \RKA\Middleware\IpAddress());
+
+    $this->get('/google[/]', [\App\Controllers\GoogleController::class, 'authorize'])
+        ->add(new \App\Middlewares\JWTMiddleware($this->getContainer()));
+
+    $this->post('/google/execute[/]', [\App\Controllers\GoogleController::class, 'execute'])
+        ->add(new \App\Middlewares\JWTMiddleware($this->getContainer()));
 });
 
 $app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', [\App\Controllers\CORSController::class, 'notFound']);

@@ -2,9 +2,12 @@
 
 namespace App\Controllers;
 
+use Pagerfanta\Adapter\ArrayAdapter;
+use Pagerfanta\Pagerfanta;
 use App\Auth\Session;
 use App\Models\Post;
 use Carbon\Carbon;
+use Illuminate\Pagination\Paginator;
 use Lefuturiste\LocalStorage\LocalStorage;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Http\Response;
@@ -12,6 +15,51 @@ use Validator\Validator;
 
 class PostController extends Controller
 {
+
+    public function getYears(ServerRequestInterface $request, Response $response, LocalStorage $localStorage)
+    {
+        $this->loadDatabase();
+        $validator = new Validator($request->getQueryParams());
+        $validator->notEmpty('locale');
+        if (!$validator->isValid()) {
+            return $response->withJson([
+                'success' => false,
+                'errors' => $validator->getErrors()
+            ], 400);
+        }
+        $locale = $validator->getValue('locale');
+        if ($localStorage->exist("posts-by-year.locale.{$locale}")) {
+            $years = $localStorage->get("posts-by-year.locale.{$locale}");
+        } else {
+            $query = Post::query()
+                ->select(['id', 'title', 'locale', 'slug', 'identifier', 'description', 'image', 'created_at', 'updated_at'])
+                ->orderBy('created_at', 'desc');
+
+            if ($locale !== null) {
+                $query = $query->where('locale', '=', $locale);
+            }
+            $posts = $query->get()->toArray();
+            $years = [];
+            foreach ($posts as $post) {
+                $carbon = Carbon::createFromTimeString($post['created_at']);
+                $year = $carbon->year;
+                if (!isset($years[$year])) {
+                    $years[$year] = ['name' => $year, 'count' => 0];
+                }
+                $years[$year]['count'] = $years[$year]['count'] + 1;
+            }
+            $years = array_values($years);
+            $localStorage->set("posts-by-year.locale.{$locale}", $years);
+            $localStorage->write();
+        }
+        return $response->withJson([
+            'success' => true,
+            'data' => [
+                'years' => $years
+            ]
+        ]);
+    }
+
     public function getDates(ServerRequestInterface $request, Response $response, LocalStorage $localStorage)
     {
         $this->loadDatabase();
@@ -57,8 +105,8 @@ class PostController extends Controller
     {
         $this->loadDatabase();
         $validator = new Validator($request->getQueryParams());
-        $validator->notEmpty('locale', 'limit', 'identifier');
-        $validator->integer('limit');
+        $validator->notEmpty('locale', 'limit', 'per_page', 'page', 'identifier', 'year');
+        $validator->integer('limit', 'page', 'per_page', 'year');
         if (!$validator->isValid()) {
             return $response->withJson([
                 'success' => false,
@@ -70,22 +118,40 @@ class PostController extends Controller
             ->select(['id', 'title', 'locale', 'slug', 'identifier', 'description', 'image', 'created_at', 'updated_at'])
             ->orderBy('created_at', 'desc');
 
-        if ($validator->getValue('limit') != NULL) {
+        if ($validator->getValue('limit') !== null) {
             $query = $query->limit($validator->getValue('limit'));
         }
 
         if ($validator->getValue('locale') !== null) {
-            $query = $query
-                ->where('locale', '=', $validator->getValue('locale'));
+            $query = $query->where('locale', '=', $validator->getValue('locale'));
         }
         if ($validator->getValue('identifier') !== null) {
-            $query = $query
-                ->where('identifier', '=', $validator->getValue('identifier'));
+            $query = $query->where('identifier', '=', $validator->getValue('identifier'));
         }
+
+        $year = $validator->getValue('year');
+        if ($year !== null) {
+            $query = $query->whereBetween('created_at', [date($year . '-01-01'), date($year . '-12-31')]);
+        }
+
+        $maxPerPage = intval(isset($request->getQueryParams()['per_page']) ? $request->getQueryParams()['per_page'] : 21);
+
+        $currentPage = intval(isset($request->getQueryParams()['page']) && $request->getQueryParams()['page'] > 0 ? $request->getQueryParams()['page'] : 1);
+
+        $res = $query->paginate($maxPerPage, ['*'], 'page', $currentPage)->toArray();
+        
         return $response->withJson([
             'success' => true,
             'data' => [
-                'posts' => $query->get()->toArray()
+                'posts' => $res['data'],
+                'pagination' => [
+                    'total_page' => $res['last_page'],
+                    'per_page' => $res['per_page'],
+                    'result_count' => $res['total'],
+                    'current_page' => $res['current_page'],
+                    'previous_page' => $res['prev_page_url'] === null ? null : intval(substr($res['prev_page_url'], 7)),
+                    'next_page' => $res['next_page_url'] === null ? null : intval(substr($res['next_page_url'], 7)),
+                ],
             ]
         ]);
     }
