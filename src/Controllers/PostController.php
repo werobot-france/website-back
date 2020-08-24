@@ -134,24 +134,31 @@ class PostController extends Controller
             $query = $query->whereBetween('created_at', [date($year . '-01-01'), date($year . '-12-31')]);
         }
 
-        $maxPerPage = intval(isset($request->getQueryParams()['per_page']) ? $request->getQueryParams()['per_page'] : 21);
+        $maxPerPage = intval(isset($request->getQueryParams()['per_page']) ? $request->getQueryParams()['per_page'] : null);
 
         $currentPage = intval(isset($request->getQueryParams()['page']) && $request->getQueryParams()['page'] > 0 ? $request->getQueryParams()['page'] : 1);
-
-        $res = $query->paginate($maxPerPage, ['*'], 'page', $currentPage)->toArray();
+        
+        if ($maxPerPage != null) {
+            $res = $query->paginate($maxPerPage, ['*'], 'page', $currentPage)->toArray();
+            $pagination = [
+                'total_page' => $res['last_page'],
+                'per_page' => $res['per_page'],
+                'result_count' => $res['total'],
+                'current_page' => $res['current_page'],
+                'previous_page' => $res['prev_page_url'] === null ? null : intval(substr($res['prev_page_url'], 7)),
+                'next_page' => $res['next_page_url'] === null ? null : intval(substr($res['next_page_url'], 7)),
+            ];
+            $data = $res['data'];
+        } else {
+            $pagination = [];
+            $data = $query->get()->toArray();
+        }
         
         return $response->withJson([
             'success' => true,
             'data' => [
-                'posts' => $res['data'],
-                'pagination' => [
-                    'total_page' => $res['last_page'],
-                    'per_page' => $res['per_page'],
-                    'result_count' => $res['total'],
-                    'current_page' => $res['current_page'],
-                    'previous_page' => $res['prev_page_url'] === null ? null : intval(substr($res['prev_page_url'], 7)),
-                    'next_page' => $res['next_page_url'] === null ? null : intval(substr($res['next_page_url'], 7)),
-                ],
+                'posts' => $data,
+                'pagination' => $pagination
             ]
         ]);
     }
