@@ -40,12 +40,13 @@ class Instagram
         // $re = '/window._sharedData = ({"config":[\S\s]+"});/m';
         // $doMatche = preg_match_all($re, $html, $matches, PREG_SET_ORDER, 0);
         // $json = $matches[0][1];
-        if ($json == null) {
+
+	$data = json_decode($json, true);
+        if ($data == null) {
             $u = "https://static.werobot.fr/tmp_instagram.json";
-            $json = file_get_contents($u, false, $context);
+            $data = json_decode(file_get_contents($u, false, $context), true);
         }
 
-        $data = json_decode($json, true);
         // $raw = ($data['entry_data']['ProfilePage'][0]['graphql']['user']['edge_owner_to_timeline_media']['edges']);
 
         $raw = $data['data']['user']['edge_owner_to_timeline_media']['edges'];
