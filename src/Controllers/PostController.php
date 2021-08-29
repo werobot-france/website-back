@@ -208,6 +208,8 @@ class PostController extends Controller
         $post['description'] = $validator->getValue('description') == NULL ? substr($validator->getValue('content'), 0, 150) : $validator->getValue('description');
         $post['content'] = $validator->getValue('content');
         $post['locale'] = $validator->getValue('locale');
+        $post['cover_mode'] = $validator->getValue('cover_mode');
+        $post['cover_offset'] = $validator->getValue('cover_offset');
         $post['identifier'] = $validator->getValue('identifier') == NULL ? uniqid() : $validator->getValue('identifier');
         $post['created_at'] = $validator->getValue('created_at') == NULL ? (new Carbon())->toDateTimeString() : $validator->getValue('created_at');
         if (isset($session->getData()['user']['id'])) {
@@ -249,6 +251,8 @@ class PostController extends Controller
         $post['title'] = $validator->getValue('title') === NULL ? $post['title'] : $validator->getValue('title');
         $post['slug'] = $validator->getValue('title') === NULL ? $post['slug'] : str_slug($validator->getValue('title'));
         $post['image'] = $validator->getValue('image') === NULL ? $post['image'] : $validator->getValue('image');
+        $post['cover_mode'] = $validator->getValue('cover_mode');
+        $post['cover_offset'] = $validator->getValue('cover_offset');
         $post['description'] = $validator->getValue('content') === NULL ? $post['description'] : ($validator->getValue('description') == NULL ? substr($validator->getValue('content'), 0, 150) : $validator->getValue('description'));
         $post['content'] = $validator->getValue('content') === NULL ? $post['content'] : $validator->getValue('content');
         $post['created_at'] = $validator->getValue('created_at') == NULL ? $post['created_at'] : $validator->getValue('created_at');
