@@ -1,9 +1,13 @@
 <?php
 require 'vendor/autoload.php';
 
-$client = new GuzzleHttp\Client(['http_errors' => false]);
+if (!isset($argv[1]) || $argv[1] === '') {
+    echo "You must provide a auth token at argv 1 \n";
+    exit();
+}
+$token = $argv[1];
 
-$token = "W4rkq86fqlSewUmR0yBcXzMHLLwl1Cym";
+$client = new GuzzleHttp\Client(['http_errors' => false]);
 
 // fetch all posts
 // for each image: verify if the image is too small and if the case, update the image to original size
@@ -26,12 +30,14 @@ foreach ($posts as $post) {
     $images = [];
     $post = json_decode(file_get_contents('https://api.werobot.fr/post/' . $post['slug']), 1)['data']['post'];
     $images[] = $post['image'];
-    preg_match_all('/https:\/\/static\.werobot\.fr\/blog\/bob-ross\/[a-zA-Z0-9]+\.[a-z]{3}/m', $post['content'], $matches, PREG_SET_ORDER, 0);
+    $re = '/https:\/\/static\.werobot\.fr\/blog\/bob-ross\/[A-z0-9]+\/(50|original|75|25)\.[a-z]{2,4}/m';
+    preg_match_all($re, $post['content'], $matches, PREG_SET_ORDER, 0);
     foreach ($matches as $match) {
         if (isset($match[0])) {
             $images[] = $match[0];
         }
     }
+//    var_dump(count($images));
     foreach ($images as $image) {
         echo ".        > migrating : ";
         echo $image . " \n";
@@ -62,10 +68,21 @@ foreach ($posts as $post) {
 //                exit();
 //            }
 //
-            $re = '/\/([a-z 0-9]+)\/50.[a-z]{3,4}/m';
+            $re = '/\/([a-z 0-9]+)\/(25|75|50|original).[a-z]{3,4}/m';
             preg_match_all($re, $image, $matches, PREG_SET_ORDER, 0);
             $imageId = $matches[0][1];
+            echo ".        > ". $imageId . "\n";
 //            $imageApi['created_at'] = $post['created_at'];
+
+            $response = $client->put("https://api.werobot.fr/image/" . $imageId, [
+                'json' => [
+                    'created_at' => $post['created_at']
+                ],
+                "headers" => [
+                    'Authorization' => 'Bearer ' . $token,
+                    'Accept' => 'application/json'
+                ]
+            ]);
 
         } else {
             echo ".        > abort because of a .gif image \n";
