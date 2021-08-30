@@ -58,12 +58,19 @@ class PhotosController extends Controller
             mkdir($rootPath);
         }
 
+        if (!function_exists('str_ends_with')) {
+            function endsWith($haystack, $needle) {
+                $length = strlen($needle);
+                return $length > 0 ? substr($haystack, -$length) === $needle : true;
+            }
+        }
+
         if (file_exists($fullPath)) {
             $content = file_get_contents($fullPath);
         }
         else {
             $parsed = parse_url($url);
-            if ($parsed['host'] !== 'scontent-cdt1-1.cdninstagram.com') {
+            if (!str_ends_with($parsed['host'], 'cdninstagram.com')) {
                 return $response->withJson(['success' => false, 'errors' => ['Invalid host']]);
             }
             if ($parsed['scheme'] !== 'https') {
