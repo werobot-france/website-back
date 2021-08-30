@@ -12,5 +12,11 @@ return [
     ],
     'contact_message_discord_webhook' => getenv('CONTACT_MESSAGE_DISCORD_WEBHOOK'),
     'root_path' => dirname(dirname(__DIR__)) . '/tmp',
-    'bypass_instagram_scraping' => getEnvBoolean('BYPASS_INSTAGRAM_SCRAPING')
+    'bypass_instagram_scraping' => getEnvBoolean('BYPASS_INSTAGRAM_SCRAPING'),
+    'cors_allowed_hosts' => array_merge([
+        'werobot.fr',
+        'www.werobot.fr',
+        'admin.werobot.fr',
+        'web.werobot.fr'
+    ], explode(',', envOrDefault('CORS_ALLOWED_HOSTS', '')))
 ];
