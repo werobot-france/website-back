@@ -40,10 +40,14 @@ function d($value = 'Die and Debug ! ;)')
 | Get environment var and default is is null
 |--------------------------------------------------------------------------
 */
-function envOrDefault($value, $default = NULL){
-	if (getenv($value) == false || getenv($value) == '' || empty(getenv($value))){
-		return $default;
-	}else{
-		return getenv($value);
-	}
+function envOrDefault($key, $default = NULL){
+  if (getenv($key) == false || getenv($key) == '' || empty(getenv($key))){
+    return $default;
+  } else {
+    return getenv($key);
+  }
+}
+
+function getEnvBoolean($key, $default = false) {
+  return envOrDefault($key, $default) === 'true' || envOrDefault($key, $default) === '1';
 }

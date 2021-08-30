@@ -38,6 +38,8 @@ $app->post('/contact', [\App\Controllers\ContactController::class, 'contact'])
 
 $app->get('/photos', [\App\Controllers\PhotosController::class, 'photos']);
 
+$app->get('/proxy-picture', [\App\Controllers\PhotosController::class, 'proxyInstagramImage']);
+
 $app->group('/image', function () {
     $this->get('[/]', [\App\Controllers\ImageController::class, 'getMany']);
     $this->get('/{id}[/]', [\App\Controllers\ImageController::class, 'getOne']);

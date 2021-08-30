@@ -2,8 +2,7 @@
 return [
     'app_name' => envOrDefault('APP_NAME', ''),
     'app_env' => envOrDefault('APP_ENV', ''),
-    'debug' => envOrDefault('DEBUG', false) === 'true' || envOrDefault('DEBUG', false) === '1' ? true: false,
-
+    'debug' => getEnvBoolean('DEBUG'),
     'recaptcha' => [
         'private' => getenv('RECAPTCHA_PRIVATE')
     ],
@@ -11,5 +10,7 @@ return [
         'destination_path' => getenv('IMAGE_PATH'),
         'public_base_path' => getenv('IMAGE_PUBLIC_BASE_URL')
     ],
-    'contact_message_discord_webhook' => getenv('CONTACT_MESSAGE_DISCORD_WEBHOOK')
+    'contact_message_discord_webhook' => getenv('CONTACT_MESSAGE_DISCORD_WEBHOOK'),
+    'root_path' => dirname(dirname(__DIR__)) . '/tmp',
+    'bypass_instagram_scraping' => getEnvBoolean('BYPASS_INSTAGRAM_SCRAPING')
 ];

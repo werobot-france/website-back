@@ -27,9 +27,6 @@ return [
     \App\ReCaptcha::class => function (ContainerInterface $container) {
         return new \App\ReCaptcha($container->get('recaptcha')['private']);
     },
-    \App\Instagram::class => function (ContainerInterface $container) {
-        return new \App\Instagram($container->get('instagram')['access_token']);
-    },
     \Lefuturiste\LocalStorage\LocalStorage::class => function () {
         return new \Lefuturiste\LocalStorage\LocalStorage(dirname(dirname(__DIR__)) . '/tmp/local_storage.json');
     },

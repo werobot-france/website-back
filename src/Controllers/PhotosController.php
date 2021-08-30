@@ -36,4 +36,45 @@ class PhotosController extends Controller
             ]
         ]);
     }
+
+    public function proxyInstagramImage(ServerRequestInterface $request, Response $response)
+    {
+        $validator = new Validator($request->getQueryParams());
+        $validator->required('url');
+        $validator->notEmpty('url');
+        if (!$validator->isValid()) {
+            return $response->withJson([
+                'success' => false,
+                'errors' => $validator->getErrors()
+            ], 400);
+        }
+        $url = base64_decode($validator->getValue('url'));
+
+        $fileName = hash('sha256', $url) . '.jpg';
+        $rootPath = $this->container->get('root_path') . '/tmp/instagram_cache';
+        $fullPath = $rootPath . '/' . $fileName;
+
+        if (!file_exists($rootPath)) {
+            mkdir($rootPath);
+        }
+
+        if (file_exists($fullPath)) {
+            $content = file_get_contents($fullPath);
+        }
+        else {
+            $parsed = parse_url($url);
+            if ($parsed['host'] !== 'scontent-cdt1-1.cdninstagram.com') {
+                return $response->withJson(['success' => false, 'errors' => ['Invalid host']]);
+            }
+            if ($parsed['scheme'] !== 'https') {
+                return $response->withJson(['success' => false, 'errors' => ['Invalid scheme']]);
+            }
+            $content = file_get_contents($url);
+            file_put_contents($fullPath, $content);
+        }
+    
+        $response->getBody()->write($content);
+        return $response
+          ->withHeader('Content-Type', 'image/jpeg');
+    }
 }
