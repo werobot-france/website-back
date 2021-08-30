@@ -1,7 +1,7 @@
 <?php
 $app->options('/{routes:.+}', [\App\Controllers\CORSController::class, 'allOptions']);
 
-$app->add(new \App\Middlewares\CORSMiddleware());
+$app->add(new \App\Middlewares\CORSMiddleware($app->getContainer()));
 
 $app->get('/', [\App\Controllers\DefaultController::class, 'home']);
 
@@ -56,9 +56,8 @@ $app->group('/image', function () {
 //})->add(new \App\Middlewares\JWTMiddleware());
 
 $app->post('/image-upload', [\App\Controllers\ImageUpload::class, 'upload'])
-    ->add(new \App\Middlewares\CORSMiddleware())
+    ->add(new \App\Middlewares\CORSMiddleware($app->getContainer()))
     ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
-
 
 $app->group('/google-photos', function () {
     $this->get('/albums[/]', [\App\Controllers\GoogleController::class, 'getAllAlbums']);
