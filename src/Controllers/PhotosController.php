@@ -59,7 +59,7 @@ class PhotosController extends Controller
         }
 
         if (!function_exists('str_ends_with')) {
-            function endsWith($haystack, $needle) {
+            function str_ends_with($haystack, $needle) {
                 $length = strlen($needle);
                 return $length > 0 ? substr($haystack, -$length) === $needle : true;
             }
