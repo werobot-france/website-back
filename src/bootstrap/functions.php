@@ -51,3 +51,13 @@ function envOrDefault($key, $default = NULL){
 function getEnvBoolean($key, $default = false) {
   return envOrDefault($key, $default) === 'true' || envOrDefault($key, $default) === '1';
 }
+
+function getAllowedOrigins($default = []) {
+  $additionnalsOriginsRaw = envOrDefault('CORS_ALLOWED_ORIGINS');
+  $additionnals = [];
+  if ($additionnalsOriginsRaw != '') {
+    $additionnals = explode(',', $additionnalsOriginsRaw);
+  }
+
+  return array_merge($default, $additionnals);
+}

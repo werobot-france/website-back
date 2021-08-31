@@ -1,6 +1,9 @@
 <?php
 $app->options('/{routes:.+}', [\App\Controllers\CORSController::class, 'allOptions']);
 
+$app->get('/allowed-origins', [\App\Controllers\CORSController::class, 'getAllowedOrigins']);
+$app->get('/check-origin', [\App\Controllers\CORSController::class, 'getAllowedOrigins']);
+
 $app->add(new \App\Middlewares\CORSMiddleware($app->getContainer()));
 
 $app->get('/', [\App\Controllers\DefaultController::class, 'home']);

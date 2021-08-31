@@ -10,6 +10,14 @@ class CORSController extends Controller
         return $response->withJson(true);
     }
 
+    public function getAllowedOrigins(Response $response) {
+        $allowedOrigins = $this->container->get('cors_allowed_origins');
+        return $response->withJson([
+            'success' => true,
+            'data' => $allowedOrigins
+        ]);
+    }
+
     public function notFound(Response $response) {
         return $response->withJson([
             'success' => false,
