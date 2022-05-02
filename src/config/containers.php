@@ -18,10 +18,10 @@ return [
 
         return $capsule;
     },
-    STAILEUAccounts\STAILEUAccounts::class => function (ContainerInterface $container) {
-        return new STAILEUAccounts\STAILEUAccounts(
-            $container->get('staileu')['private'],
-            $container->get('staileu')['public']
+    \STAILEUAccounts\Client::class => function (ContainerInterface $container) {
+        return new STAILEUAccounts\Client(
+            $container->get('staileu')['public'],
+            $container->get('staileu')['private']
         );
     },
     \App\ReCaptcha::class => function (ContainerInterface $container) {
@@ -32,5 +32,15 @@ return [
     },
     \DiscordWebhooks\Client::class => function (ContainerInterface $container) {
         return new \DiscordWebhooks\Client($container->get('contact_message_discord_webhook'));
+    },
+    \Google\Auth\OAuth2::class => function (ContainerInterface $container) {
+        return new \Google\Auth\OAuth2([
+            'clientId' => $container->get('google')['client_id'],
+            'clientSecret' => $container->get('google')['client_secret'],
+            'authorizationUri' => 'https://accounts.google.com/o/oauth2/v2/auth',
+            'redirectUri' => $container->get('google')['redirection_url'],
+            'tokenCredentialUri' => 'https://www.googleapis.com/oauth2/v4/token',
+            'scope' => $container->get('google')['scope'],
+        ]);
     }
 ];

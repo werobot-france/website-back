@@ -7,14 +7,17 @@ use App\Models\User;
 use Carbon\Carbon;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Http\Response;
-use STAILEUAccounts\STAILEUAccounts;
+use STAILEUAccounts\Client;
 use Validator\Validator;
 
 class STAILEUController extends Controller
 {
-    public function getLogin(Response $response, STAILEUAccounts $STAILEUAccounts)
+    public function getLogin(Response $response, Client $STAILEUAccounts)
     {
-        $url = $STAILEUAccounts->loginForm($this->container->get('staileu')['redirect']);
+        $url = $STAILEUAccounts->getAuthorizeUrl($this->container->get('staileu')['redirect'], [
+            Client::SCOPE_READ_PROFILE,
+            Client::SCOPE_READ_EMAIL
+        ]);
         return $response->withJson([
             'success' => true,
             'data' => [
@@ -23,7 +26,7 @@ class STAILEUController extends Controller
         ]);
     }
 
-    public function execute(ServerRequestInterface $request, Response $response, STAILEUAccounts $STAILEUAccounts, Session $session)
+    public function execute(ServerRequestInterface $request, Response $response, Client $STAILEUAccounts, Session $session)
     {
         $this->loadDatabase();
         if ($request->getMethod() == 'POST'){
@@ -31,32 +34,32 @@ class STAILEUController extends Controller
         }else{
             $validator = new Validator($request->getQueryParams());
         }
-        $validator->required('c-sa');
-        $validator->notEmpty('c-sa');
+        $validator->required('code');
+        $validator->notEmpty('code');
         if ($validator->isValid()) {
-            $result = $STAILEUAccounts->check($validator->getValue('c-sa'));
-            if (is_string($result)) {
-                $user = User::query()->find($result);
+            if ($STAILEUAccounts->verify($validator->getValue('code'))) {
+                $STAILUser = $STAILEUAccounts->fetchUser();
+                $user = User::query()->find($STAILUser->id);
                 if ($user == NULL) {
                     $user = new User();
-                    $user['id'] = $result;
+                    $user['id'] = $STAILUser->id;
                 }
-                $username = $STAILEUAccounts->getUsername($result);
-                $email = $STAILEUAccounts->getEmail($result);
-                $avatar = $STAILEUAccounts->getAvatar($result)->getUrl();
+                $username = $STAILUser->username;
+                $email = $STAILUser->email;
+                $avatar = $STAILUser->avatarUrl;
                 $user['last_login_at'] = Carbon::now();
                 $user['last_user_agent'] = $request->getServerParams()['HTTP_USER_AGENT'];
                 $user['last_ip'] = $request->getAttribute('ip_address');
                 $user['last_avatar'] = $avatar;
                 $user['last_email'] = $email;
                 $user['last_username'] = $username;
-                if ($result == $this->container->get('default_admin_user_id')){
+                if ($STAILUser->id == $this->container->get('default_admin_user_id')){
                     $user['is_admin'] = true;
                 }
                 $user->save();
                 //generate a token and save it into cookie
                 $userData = [
-                    'id' => $result,
+                    'id' => $STAILUser->id,
                     'email' => $email,
                     'avatar' => $avatar,
                     'username' => $username,
@@ -74,7 +77,7 @@ class STAILEUController extends Controller
                 return $response->withJson([
                     'success' => false,
                     'errors' => [
-                        $result->getCode() . ": " . $result->getMessage()
+                        'Error with STAIL.EU'
                     ]
                 ])->withStatus(400);
             }
