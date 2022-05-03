@@ -6,13 +6,13 @@ use App\Models\Message;
 use App\Models\Post;
 use Carbon\Carbon;
 use Lefuturiste\LocalStorage\LocalStorage;
-use Slim\Http\Response;
+use Psr\Http\Message\ResponseInterface;
 
 class BackupController extends Controller
 {
-    public function getMany(Response $response, LocalStorage $localStorage)
+    public function getMany($_, ResponseInterface $response)
     {
-        $backups = $localStorage->get('backups');
+        $backups = $this->localStorage()->get('backups');
         $backups = $backups === NULL ? [] : $backups;
         $backups = array_map(function ($backup) {
             return [
@@ -21,6 +21,7 @@ class BackupController extends Controller
                 'checksum' => $backup['checksum']
             ];
         }, $backups);
+
         return $response->withJson([
             'success' => true,
             'data' => [
@@ -29,11 +30,13 @@ class BackupController extends Controller
         ]);
     }
 
-    public function getOne($id, Response $response, LocalStorage $localStorage)
+    public function getOne($_, ResponseInterface $response, array $args)
     {
-        $backup = array_filter($localStorage->get('backups'), function ($item) use ($id) {
+        $id = $args['id'];
+        $backup = array_filter($this->localStorage()->get('backups'), function ($item) use ($id) {
             return $item['id'] === $id;
         });
+
         return $response->withJson([
             'success' => true,
             'data' => [
@@ -42,10 +45,10 @@ class BackupController extends Controller
         ]);
     }
 
-    public function create(Response $response, LocalStorage $localStorage)
+    public function create($_, ResponseInterface $response)
     {
         $this->loadDatabase();
-        $backups = $localStorage->get('backups');
+        $backups = $this->localStorage()->get('backups');
         $backups = $backups === NULL ? [] : $backups;
         $data = [
             'posts' => Post::all(),
@@ -58,8 +61,9 @@ class BackupController extends Controller
             'data' => $data
         ];
         $backups[] = $backup;
-        $localStorage->set('backups', $backups);
-        $localStorage->save();
+        $this->localStorage()->set('backups', $backups);
+        $this->localStorage()->save();
+
         return $response->withJson([
             'success' => true,
             'data' => [

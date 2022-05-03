@@ -1,5 +1,6 @@
 <?php
 
+use Cocur\Slugify\Slugify;
 use Phinx\Seed\AbstractSeed;
 
 class PostSeeder extends AbstractSeed
@@ -29,6 +30,7 @@ class PostSeeder extends AbstractSeed
 
         $identifier = 0;
         $locale = false;
+        $slugger = new Slugify();
         for ($i = 0; $i < 20; $i++) {
             if ($locale) {
                 $locale = 'fr';
@@ -41,7 +43,7 @@ class PostSeeder extends AbstractSeed
                 'identifier' => $identifiers[$identifier],
                 'locale' => $locale,
                 'title' => $title,
-                'slug' => str_slug($title),
+                'slug' => $slugger->slugify($title),
                 'description' => $faker->text(190),
                 'image' => $faker->randomElement($images),
                 'content' => $markdown,

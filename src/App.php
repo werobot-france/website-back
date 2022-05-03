@@ -1,12 +1,34 @@
 <?php
+
 namespace App;
 
-use DI\ContainerBuilder;
+use App\Utils\ContainerBuilder;
 
-class App extends \DI\Bridge\Slim\App
+class App
 {
-    protected function configureContainer(ContainerBuilder $builder)
+    /**
+     * The absolute fs path of the root of the application
+     *
+     * @var string
+     */
+    private static string $basePath = '';
+
+    public function __construct()
     {
-        \App\ContainerBuilder::getContainerBuilder($builder);
+    }
+
+    protected function configureContainer(\DI\ContainerBuilder $builder)
+    {
+        ContainerBuilder::getContainerBuilder($builder);
+    }
+
+    public static function setBasePath(string $basePath): void
+    {
+        self::$basePath = $basePath;
+    }
+
+    public static function getBasePath(): string
+    {
+        return self::$basePath;
     }
 }

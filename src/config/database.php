@@ -2,10 +2,10 @@
 return [
     'db' => [
         'driver' => 'mysql',
-        'host' => getenv('DB_HOST'),
-        'port' => getenv('DB_PORT'),
-        'username' => getenv('DB_USERNAME'),
-        'password' => getenv('DB_PASSWORD'),
-        'database' => getenv('DB_NAME')
+        'host' => $_ENV['DB_HOST'],
+        'port' => $_ENV['DB_PORT'],
+        'username' => $_ENV['DB_USERNAME'],
+        'password' => $_ENV['DB_PASSWORD'],
+        'database' => $_ENV['DB_NAME']
     ]
 ];

@@ -1,88 +1,96 @@
 <?php
-$app->options('/{routes:.+}', [\App\Controllers\CORSController::class, 'allOptions']);
 
-$app->get('/allowed-origins', [\App\Controllers\CORSController::class, 'getAllowedOrigins']);
-$app->get('/check-origin', [\App\Controllers\CORSController::class, 'getAllowedOrigins']);
+namespace App;
 
-$app->add(new \App\Middlewares\CORSMiddleware($app->getContainer()));
+use App\Middlewares\JWTMiddleware;
+use RKA\Middleware\IpAddress;
+use Slim\Routing\RouteCollectorProxy;
 
-$app->get('/', [\App\Controllers\DefaultController::class, 'home']);
+function addRoutes(\Slim\App $app): void
+{
+    $container = $app->getContainer();
 
-$app->group('/backup', function () {
-    $this->get('[/]', [\App\Controllers\BackupController::class, 'getMany']);
-    $this->get('/{id}[/]', [\App\Controllers\BackupController::class, 'getOne']);
-    $this->post('[/]', [\App\Controllers\BackupController::class, 'create']);
-})->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
+    $app->add(new Middlewares\CORSMiddleware($container));
 
-$app->group('/post', function () use ($app) {
-    $this->get('[/]', [\App\Controllers\PostController::class, 'getMany']);
-    $this->get('/years[/]', [\App\Controllers\PostController::class, 'getYears']);
-    $this->get('/dates[/]', [\App\Controllers\PostController::class, 'getDates']);
-    $this->get('/{id}[/]', [\App\Controllers\PostController::class, 'getOne']);
-    $this->post('[/]', [\App\Controllers\PostController::class, 'store'])
-        ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
-    $this->put('/{id}[/]', [\App\Controllers\PostController::class, 'update'])
-        ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
-    $this->delete('/{id}[/]', [\App\Controllers\PostController::class, 'destroy'])
-        ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
-});
+    $app->get('/', [Controllers\DefaultController::class, 'home']);
+    $app->get('/ping', [Controllers\DefaultController::class, 'getPing']);
 
-$app->get('/cache/clear', [\App\Controllers\CacheController::class, 'clear'])
-    ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
+    $app->group('/backup', function (RouteCollectorProxy $group) {
+        $group->get('[/]', [Controllers\BackupController::class, 'getMany']);
+        $group->get('/{id}[/]', [Controllers\BackupController::class, 'getOne']);
+        $group->post('[/]', [Controllers\BackupController::class, 'create']);
+    })->add(new JWTMiddleware($container));
 
-$app->group('/message', function () use ($app) {
-    $this->get('[/]', [\App\Controllers\MessageController::class, 'getMany']);
-    $this->get('/{id}[/]', [\App\Controllers\MessageController::class, 'getOne']);
-    $this->delete('/{id}[/]', [\App\Controllers\MessageController::class, 'destroy']);
-})->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
+    $app->get('/feed[/]', [Controllers\FeedController::class, 'getFeed']);
 
-$app->post('/contact', [\App\Controllers\ContactController::class, 'contact'])
-    ->add(new \RKA\Middleware\IpAddress());
+    $app->group('/post', function (RouteCollectorProxy $group) use ($container) {
+        $group->get('[/]', [Controllers\PostController::class, 'getMany']);
+        $group->get('/years[/]', [Controllers\PostController::class, 'getYears']);
+        $group->get('/dates[/]', [Controllers\PostController::class, 'getDates']);
+        $group->get('/{id}[/]', [Controllers\PostController::class, 'getOne']);
+        $group->post('[/]', [Controllers\PostController::class, 'store'])
+            ->add(new JWTMiddleware($container));
+        $group->put('/{id}[/]', [Controllers\PostController::class, 'update'])
+            ->add(new JWTMiddleware($container));
+        $group->delete('/{id}[/]', [Controllers\PostController::class, 'destroy'])
+            ->add(new JWTMiddleware($container));
+    });
 
-$app->get('/photos', [\App\Controllers\PhotosController::class, 'photos']);
+    $app->get('/cache/clear', [Controllers\CacheController::class, 'clear'])
+        ->add(new JWTMiddleware($container));
 
-$app->get('/proxy-picture', [\App\Controllers\PhotosController::class, 'proxyInstagramImage']);
+    $app->group('/message', function (RouteCollectorProxy $group) use ($container) {
+        $group->get('[/]', [Controllers\MessageController::class, 'getMany']);
+        $group->get('/{id}[/]', [Controllers\MessageController::class, 'getOne']);
+        $group->delete('/{id}[/]', [Controllers\MessageController::class, 'destroy']);
+    })->add(new JWTMiddleware($container));
 
-$app->group('/image', function () {
-    $this->get('[/]', [\App\Controllers\ImageController::class, 'getMany']);
-    $this->get('/{id}[/]', [\App\Controllers\ImageController::class, 'getOne']);
-    $this->get('/{id}/display[/]', [\App\Controllers\ImageController::class, 'display']);
-    $this->put('/{id}[/]', [\App\Controllers\ImageController::class, 'update']);
-    $this->delete('/{id}[/]', [\App\Controllers\ImageController::class, 'destroy']);
-})->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
+    $app->post('/contact', [Controllers\ContactController::class, 'contact'])
+        ->add(new IpAddress());
 
-//$app->group('/oauth', function () {
-//    $this->get('/twitter/authorize', [TwitterController::class]);
-//    $this->get('/facebook/authorize');
-//    $this->post('/facebook/execute');
-//    $this->post('/twitter/execute');
-//})->add(new \App\Middlewares\JWTMiddleware());
+    $app->get('/photos', [Controllers\PhotosController::class, 'photos']);
 
-$app->post('/image-upload', [\App\Controllers\ImageUpload::class, 'upload'])
-    ->add(new \App\Middlewares\CORSMiddleware($app->getContainer()))
-    ->add(new \App\Middlewares\JWTMiddleware($app->getContainer()));
+    $app->get('/proxy-picture', [Controllers\PhotosController::class, 'proxyInstagramImage']);
 
-$app->group('/google-photos', function () {
-    $this->get('/albums[/]', [\App\Controllers\GoogleController::class, 'getAllAlbums']);
-    //$this->get('/shared-albums[/]', [\App\Controllers\GoogleController::class, 'getSharedAlbums']);
-    $this->get('/album/{id}[/]', [\App\Controllers\GoogleController::class, 'getAlbum']);
-})->add(new \App\Middlewares\JWTMiddleware($app->getContainer()))->add(new \Slim\Middleware\Session());
+    $app->group('/image', function (RouteCollectorProxy $group) {
+        $group->get('[/]', [Controllers\ImageController::class, 'getMany']);
+        $group->get('/{id}[/]', [Controllers\ImageController::class, 'getOne']);
+        $group->get('/{id}/display[/]', [Controllers\ImageController::class, 'display']);
+        $group->put('/{id}[/]', [Controllers\ImageController::class, 'update']);
+        $group->delete('/{id}[/]', [Controllers\ImageController::class, 'destroy']);
+    })->add(new JWTMiddleware($container));
 
-$app->group('/auth', function () {
-    $this->get('/login[/]', [\App\Controllers\STAILEUController::class, 'getLogin']);
+    //$app->group('/oauth', function () {
+    //    $this->get('/twitter/authorize', [TwitterController::class]);
+    //    $this->get('/facebook/authorize');
+    //    $this->post('/facebook/execute');
+    //    $this->post('/twitter/execute');
+    //})->add(new \App\Middlewares\JWTMiddleware());
 
-    $this->get('/info', [\App\Controllers\STAILEUController::class, 'getInfo'])
-        ->add(new \App\Middlewares\JWTMiddleware($this->getContainer()));
+    $app->post('/image-upload', [Controllers\ImageUpload::class, 'upload'])
+        ->add(new \App\Middlewares\CORSMiddleware($container))
+        ->add(new JWTMiddleware($container));
 
-    $this->post('/execute[/]', [\App\Controllers\STAILEUController::class, 'execute'])
-        ->add(new \RKA\Middleware\IpAddress());
+    // $app->group('/google-photos', function (RouteCollectorProxy $group) {
+    //     $group->get('/albums[/]', [Controllers\GoogleController::class, 'getAllAlbums']);
+    //     //$this->get('/shared-albums[/]', [Controllers\GoogleController::class, 'getSharedAlbums']);
+    //     $group->get('/album/{id}[/]', [Controllers\GoogleController::class, 'getAlbum']);
+    // })->add(new \App\Middlewares\JWTMiddleware($container))->add(new \Slim\Middleware\Session());
 
-    $this->get('/google[/]', [\App\Controllers\GoogleController::class, 'authorize'])
-        ->add(new \App\Middlewares\JWTMiddleware($this->getContainer()));
+     $app->group('/auth', function (RouteCollectorProxy $group) use ($container) {
+         //$this->get('/login[/]', [Controllers\STAILEUController::class, 'getLogin']);
 
-    $this->post('/google/execute[/]', [\App\Controllers\GoogleController::class, 'execute'])
-        ->add(new \App\Middlewares\JWTMiddleware($this->getContainer()));
-});
+         $group->get('/info', [Controllers\DefaultController::class, 'getInfo'])
+              ->add(new JWTMiddleware($container));
 
-$app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', [\App\Controllers\CORSController::class, 'notFound']);
+         // $this->post('/execute[/]', [Controllers\STAILEUController::class, 'execute'])
+         //     ->add(new \RKA\Middleware\IpAddress());
 
+         // $this->get('/google[/]', [Controllers\GoogleController::class, 'authorize'])
+         //     ->add(new \App\Middlewares\JWTMiddleware($this->getContainer()));
+
+         // $this->post('/google/execute[/]', [Controllers\GoogleController::class, 'execute'])
+         //     ->add(new \App\Middlewares\JWTMiddleware($this->getContainer()));
+     });
+
+}

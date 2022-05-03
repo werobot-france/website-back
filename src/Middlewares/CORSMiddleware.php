@@ -2,52 +2,55 @@
 
 namespace App\Middlewares;
 
-use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Slim\Http\Factory\DecoratedResponseFactory;
 use Slim\Http\Response;
+use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Psr7\Factory\StreamFactory;
+use Psr\Container\ContainerInterface;
 
 class CORSMiddleware
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
-
-    public function __construct(ContainerInterface $container)
+    public function __construct(
+        private ContainerInterface $container
+    )
     {
-        $this->container = $container;
     }
 
-    public function __invoke(ServerRequestInterface $request, Response $response, $next)
+    public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $allowedOrigins = $this->container->get('cors_allowed_origins');
+        $allowedOrigins = [
+            ...$this->container->get('cors_allowed_origins')
+        ];
         if (!$request->hasHeader('Origin')) {
-            if ($request->getRequestTarget() === '/check-origin') {
-                return $response->withJson(['success' => false, 'errors' => ['No Origin header detected']], 400);
-            }
-            return $next($request, $response);
+            // do not treat this request with CORS
+            return $handler->handle($request);
         }
         $origin = $request->getHeader('Origin')[0];
-        if (!in_array($origin, $allowedOrigins)) {
-            if ($request->getMethod() === "OPTIONS") {
-                return $response->withJson(false);
-            }
-            if ($request->getRequestTarget() === '/check-origin') {
-                return $response->withJson(['success' => true, 'is_allowed' => false]);
-            }
-            return $next($request, $response);
+        if (in_array($origin, $allowedOrigins) === false) {
+            // this origin is not allowed, skip CORS
+            return $handler->handle($request);
         }
-        $response = $response
+
+        if ($request->getMethod() === 'OPTIONS') {
+            $response = (new DecoratedResponseFactory(new ResponseFactory(), new StreamFactory()))->createResponse();
+            return $this
+                ->alterResponse($origin, $response)
+                ->withJson(true);
+        }
+
+        $response = $handler->handle($request);
+
+        return $this->alterResponse($origin, $response);
+    }
+
+    private function alterResponse(string $origin, ResponseInterface $response): ResponseInterface
+    {
+        return $response
             ->withHeader('Access-Control-Allow-Origin', $origin)
             ->withHeader('Access-Control-Allow-Methods', 'POST, PUT, GET, OPTIONS, DELETE')
             ->withHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, Authorization');
-        if ($request->getMethod() == "OPTIONS") {
-            return $response->withJson(true);
-        }
-        if ($request->getRequestTarget() === '/check-origin') {
-            return $response->withJson(['success' => true, 'is_allowed' => true]);
-        }
-
-        return $next($request, $response);
     }
 }

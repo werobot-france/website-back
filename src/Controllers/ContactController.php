@@ -6,13 +6,13 @@ use App\Models\Message;
 use App\ReCaptcha;
 use DiscordWebhooks\Client;
 use DiscordWebhooks\Embed;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Http\Response;
 use Validator\Validator;
 
 class ContactController extends Controller
 {
-    public function contact(ServerRequestInterface $request, Response $response, ReCaptcha $reCaptcha)
+    public function contact(ServerRequestInterface $request, ResponseInterface $response)
     {
         $validator = new Validator($request->getParsedBody());
         $validator->required('name', 'email', 'subject', 'content', 'code');
@@ -27,6 +27,7 @@ class ContactController extends Controller
                 'errors' => $validator->getErrors()
             ], 400);
         }
+        $reCaptcha = $this->container->get(ReCaptcha::class);
         if ($reCaptcha->validate($validator->getValue('code')) === false) {
             return $response->withJson([
                 'success' => false,

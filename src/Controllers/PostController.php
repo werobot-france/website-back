@@ -2,21 +2,17 @@
 
 namespace App\Controllers;
 
-use Pagerfanta\Adapter\ArrayAdapter;
-use Pagerfanta\Pagerfanta;
-use App\Auth\Session;
+use Cocur\Slugify\Slugify;
 use App\Models\Post;
 use Carbon\Carbon;
-use Illuminate\Pagination\Paginator;
-use Lefuturiste\LocalStorage\LocalStorage;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Http\Response;
 use Validator\Validator;
+use Psr\Http\Message\ResponseInterface;
 
 class PostController extends Controller
 {
 
-    public function getYears(ServerRequestInterface $request, Response $response, LocalStorage $localStorage)
+    public function getYears(ServerRequestInterface $request, ResponseInterface $response)
     {
         $this->loadDatabase();
         $validator = new Validator($request->getQueryParams());
@@ -28,8 +24,8 @@ class PostController extends Controller
             ], 400);
         }
         $locale = $validator->getValue('locale');
-        if ($localStorage->exist("posts-by-year.locale.{$locale}")) {
-            $years = $localStorage->get("posts-by-year.locale.{$locale}");
+        if ($this->localStorage()->exist("posts-by-year.locale.{$locale}")) {
+            $years = $this->localStorage()->get("posts-by-year.locale.{$locale}");
         } else {
             $query = Post::query()
                 ->select(['id', 'title', 'locale', 'slug', 'identifier', 'description', 'image', 'created_at', 'updated_at'])
@@ -49,8 +45,8 @@ class PostController extends Controller
                 $years[$year]['count'] = $years[$year]['count'] + 1;
             }
             $years = array_values($years);
-            $localStorage->set("posts-by-year.locale.{$locale}", $years);
-            $localStorage->write();
+            $this->localStorage()->set("posts-by-year.locale.{$locale}", $years);
+            $this->localStorage()->write();
         }
         return $response->withJson([
             'success' => true,
@@ -60,7 +56,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function getDates(ServerRequestInterface $request, Response $response, LocalStorage $localStorage)
+    public function getDates(ServerRequestInterface $request, ResponseInterface $response)
     {
         $this->loadDatabase();
         $validator = new Validator($request->getQueryParams());
@@ -72,8 +68,8 @@ class PostController extends Controller
             ], 400);
         }
         $locale = $validator->getValue('locale');
-        if ($localStorage->exist("posts-by-dates.locale.{$locale}")) {
-            $categoriesDates = $localStorage->get("posts-by-dates.locale.{$locale}");
+        if ($this->localStorage()->exist("posts-by-dates.locale.{$locale}")) {
+            $categoriesDates = $this->localStorage()->get("posts-by-dates.locale.{$locale}");
         } else {
             $query = Post::query()
                 ->select(['id', 'title', 'locale', 'slug', 'identifier', 'description', 'image', 'created_at', 'updated_at'])
@@ -92,8 +88,8 @@ class PostController extends Controller
                 $hash = $year . '-' . $month;
                 $categoriesDates[$hash][] = $post;
             }
-            $localStorage->set("posts-by-dates.locale.{$locale}", $categoriesDates);
-            $localStorage->write();
+            $this->localStorage()->set("posts-by-dates.locale.{$locale}", $categoriesDates);
+            $this->localStorage()->write();
         }
         return $response->withJson([
             'success' => true,
@@ -101,7 +97,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function getMany(ServerRequestInterface $request, Response $response)
+    public function getMany(ServerRequestInterface $request, ResponseInterface $response)
     {
         $this->loadDatabase();
         $validator = new Validator($request->getQueryParams());
@@ -137,7 +133,7 @@ class PostController extends Controller
         $maxPerPage = intval(isset($request->getQueryParams()['per_page']) ? $request->getQueryParams()['per_page'] : null);
 
         $currentPage = intval(isset($request->getQueryParams()['page']) && $request->getQueryParams()['page'] > 0 ? $request->getQueryParams()['page'] : 1);
-        
+
         if ($maxPerPage != null) {
             $res = $query->paginate($maxPerPage, ['*'], 'page', $currentPage)->toArray();
             $pagination = [
@@ -153,7 +149,9 @@ class PostController extends Controller
             $pagination = [];
             $data = $query->get()->toArray();
         }
-        
+
+        $data = array_map(fn ($p) => $this->formatPost($p), $data);
+
         return $response->withJson([
             'success' => true,
             'data' => [
@@ -163,9 +161,10 @@ class PostController extends Controller
         ]);
     }
 
-    public function getOne($id, Response $response)
+    public function getOne($_, ResponseInterface $response, array $args)
     {
         $this->loadDatabase();
+        $id = $args['id'];
         $post = Post::query()->find($id);
         if ($post == NULL) {
           $post = Post::query()->where('slug', '=', $id)->first();
@@ -181,12 +180,12 @@ class PostController extends Controller
         return $response->withJson([
             'success' => true,
             'data' => [
-                'post' => $post->toArray()
+                'post' => $this->formatPost($post->toArray())
             ]
         ]);
     }
 
-    public function store(ServerRequestInterface $request, Response $response, Session $session)
+    public function store(ServerRequestInterface $request, ResponseInterface $response)
     {
         $validator = new Validator($request->getParsedBody());
         $validator->required('title', 'content', 'image', 'locale');
@@ -200,10 +199,11 @@ class PostController extends Controller
             ], 400);
         }
         $this->loadDatabase();
+        $slugger = new Slugify();
         $post = new Post();
         $post['id'] = uniqid();
         $post['title'] = $validator->getValue('title');
-        $post['slug'] = str_slug($validator->getValue('title'));
+        $post['slug'] = $slugger->slugify($validator->getValue('title'));
         $post['image'] = $validator->getValue('image');
         $post['description'] = $validator->getValue('description') == NULL ? substr($validator->getValue('content'), 0, 150) : $validator->getValue('description');
         $post['content'] = $validator->getValue('content');
@@ -212,20 +212,21 @@ class PostController extends Controller
         $post['cover_offset'] = $validator->getValue('cover_offset');
         $post['identifier'] = $validator->getValue('identifier') == NULL ? uniqid() : $validator->getValue('identifier');
         $post['created_at'] = $validator->getValue('created_at') == NULL ? (new Carbon())->toDateTimeString() : $validator->getValue('created_at');
-        if (isset($session->getData()['user']['id'])) {
-            $post->user()->associate($session->getUserId());
+        if (isset($this->session()->getData()['user']['id'])) {
+            $post->user()->associate($this->session()->getUserId());
         }
         $post->save();
         return $response->withJson([
             'success' => true,
             'data' => [
-                'post' => $post->toArray()
+                'post' => $this->formatPost($post->toArray())
             ]
         ]);
     }
 
-    public function update($id, ServerRequestInterface $request, Response $response)
+    public function update(ServerRequestInterface $request, ResponseInterface $response, $args)
     {
+        $id = $args['id'];
         $validator = new Validator($request->getParsedBody());
         $validator->notEmpty('title', 'description', 'content', 'image', 'created_at');
         $validator->url('image');
@@ -248,8 +249,9 @@ class PostController extends Controller
             ], 404);
         }
 
+        $slugger = new Slugify();
         $post['title'] = $validator->getValue('title') === NULL ? $post['title'] : $validator->getValue('title');
-        $post['slug'] = $validator->getValue('title') === NULL ? $post['slug'] : str_slug($validator->getValue('title'));
+        $post['slug'] = $validator->getValue('title') === NULL ? $post['slug'] : $slugger->slugify($validator->getValue('title'));
         $post['image'] = $validator->getValue('image') === NULL ? $post['image'] : $validator->getValue('image');
         $post['cover_mode'] = $validator->getValue('cover_mode');
         $post['cover_offset'] = $validator->getValue('cover_offset');
@@ -269,8 +271,9 @@ class PostController extends Controller
         ]);
     }
 
-    public function destroy($id, Response $response)
+    public function destroy(ResponseInterface $response, array $args)
     {
+        $id = $args['id'];
         $this->loadDatabase();
         $post = Post::query()->find($id);
         if ($post == NULL) {
@@ -287,6 +290,13 @@ class PostController extends Controller
         return $response->withJson([
             'success' => true
         ]);
+    }
+
+    private function formatPost(array $post): array
+    {
+        $post['created_at'] = parseDateTime($post['created_at']);
+        $post['updated_at'] = parseDateTime($post['created_at']);
+        return $post;
     }
 
 }

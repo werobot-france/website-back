@@ -4,7 +4,10 @@ namespace App\Controllers;
 
 use App\Auth\Session;
 use Illuminate\Database\Capsule\Manager;
+use Lefuturiste\LocalStorage\LocalStorage;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+
 
 class Controller {
     /**
@@ -26,4 +29,10 @@ class Controller {
     {
         return $this->container->get(Session::class);
     }
+
+    public function localStorage(): LocalStorage
+    {
+        return $this->container->get(LocalStorage::class);
+    }
+
 }

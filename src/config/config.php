@@ -4,15 +4,16 @@ return [
     'app_env' => envOrDefault('APP_ENV', ''),
     'debug' => getEnvBoolean('DEBUG'),
     'recaptcha' => [
-        'private' => getenv('RECAPTCHA_PRIVATE')
+        'private' => $_ENV['RECAPTCHA_PRIVATE']
     ],
     'image_upload' => [
-        'destination_path' => getenv('IMAGE_PATH'),
-        'public_base_path' => getenv('IMAGE_PUBLIC_BASE_URL')
+        'destination_path' => $_ENV['IMAGE_PATH'],
+        'public_base_path' => $_ENV['IMAGE_PUBLIC_BASE_URL']
     ],
-    'contact_message_discord_webhook' => getenv('CONTACT_MESSAGE_DISCORD_WEBHOOK'),
-    'root_path' => dirname(dirname(__DIR__)) . '/tmp',
+    'contact_message_discord_webhook' => $_ENV['CONTACT_MESSAGE_DISCORD_WEBHOOK'],
+    'root_path' => dirname(dirname(__DIR__)),
     'bypass_instagram_scraping' => getEnvBoolean('BYPASS_INSTAGRAM_SCRAPING'),
+    'frontend_base_url' => envOrDefault('FRONTENV_BASE_URL', 'https://werobot.fr'),
     'cors_allowed_origins' => getAllowedOrigins([
         'https://werobot.fr',
         'https://www.werobot.fr',

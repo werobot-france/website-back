@@ -1,22 +1,19 @@
 <?php
 
-namespace App;
+namespace App\Utils;
 
 use Psr\Container\ContainerInterface;
 
 class Instagram
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
+    private ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }
 
-    public function getMedias()
+    public function getMedias(): array
     {
         $bypass = $this->container->get('bypass_instagram_scraping');
         $data = null;
@@ -48,14 +45,14 @@ class Instagram
                 $caption = $rawMedia['edge_media_to_caption']['edges'][0]['node']['text'];
             }
 
-            array_push($medias, [
-                'id' => $rawMedia['id'],
-                'caption' => $caption,
+            $medias[] = [
+                'id'        => $rawMedia['id'],
+                'caption'   => $caption,
                 'thumbnail' => $rawMedia['thumbnail_src'],
-                'original' => $rawMedia['display_url'],
-                'link' => 'https://www.instagram.com/p/' . $rawMedia['shortcode'] . '/',
-                'taken_at' => $rawMedia['taken_at_timestamp']
-            ]);
+                'original'  => $rawMedia['display_url'],
+                'link'      => 'https://www.instagram.com/p/' . $rawMedia['shortcode'] . '/',
+                'taken_at'  => $rawMedia['taken_at_timestamp']
+            ];
         }
         return $medias;
     }

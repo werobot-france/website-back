@@ -32,11 +32,14 @@ class MessageController extends Controller
         return $response->withJson([
             'success' => true,
             'data' => [
-                'messages' => Message::query()
-                    ->orderBy('created_at', 'desc')
-                    ->limit($limit)
-                    ->get()
-                    ->toArray()
+                'messages' => array_map(
+                    fn ($m) => $this->formatMessage($m),
+                    Message::query()
+                        ->orderBy('created_at', 'desc')
+                        ->limit($limit)
+                        ->get()
+                        ->toArray()
+                )
             ]
         ]);
     }
@@ -79,5 +82,13 @@ class MessageController extends Controller
         return $response->withJson([
             'success' => true
         ]);
+    }
+
+    private function formatMessage(array $message): array
+    {
+        $message['created_at'] = parseDateTime($message['created_at']);
+        $message['updated_at'] = parseDateTime($message['updated_at']);
+
+        return $message;
     }
 }

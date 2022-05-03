@@ -2,8 +2,8 @@
 
 namespace App\Controllers;
 
-use App\ImageHelper;
 use App\Models\Image;
+use App\Utils\ImageHelper;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Http\Response;

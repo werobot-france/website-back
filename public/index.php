@@ -1,16 +1,33 @@
 <?php
 
+use App\App;
+use App\Utils\ContainerBuilder;
+use App\Utils\DotEnv;
+use Slim\Factory\AppFactory;
+use function App\addRoutes;
+
 require '../vendor/autoload.php';
 
-if (file_exists('../.env')) {
-    $dotEnv = new \Dotenv\Dotenv(dirname(__DIR__));
-    $dotEnv->load();
-}
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 require '../src/bootstrap/functions.php';
 
-$app = new \App\App();
+App::setBasePath(dirname(__DIR__));
+
+DotEnv::load();
+
+date_default_timezone_set('Europe/Paris');
+
+$container = ContainerBuilder::direct();
+$app = AppFactory::create(container: $container);
+
+$app->addRoutingMiddleware();
+$errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
 require '../src/routes.php';
 
+addRoutes($app);
+
+//WhoopsGuard::load($app, $app->getContainer());
 $app->run();

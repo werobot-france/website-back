@@ -67,7 +67,7 @@ class ImageController extends Controller
         if ($image == NULL) {
             return $response->withJson(['success' => false], 404);
         }
-        $destinationPath = $this->container->get('root_path') . '/' . $this->container->get('image_upload')['destination_path'];
+        $destinationPath = $this->container->get('root_path') . '/tmp/' . $this->container->get('image_upload')['destination_path'];
         $path = $destinationPath . '/' . $id . '/' . 'original.' . $image['extension'];
         if (isset($request->getQueryParams()['size'])) {
             $size = 'original';
@@ -129,14 +129,15 @@ class ImageController extends Controller
         ]);
     }
 
-    public function destroy($id, Response $response)
+    public function destroy($_, Response $response, array $args)
     {
+        $id = $args['id'];
         $this->loadDatabase();
         $image = Image::query()->find($id);
         if ($image == NULL) {
             return $response->withJson(['success' => false], 404);
         }
-        $destinationPath = $this->container->get('root_path') . '/' . $this->container->get('image_upload')['destination_path'];
+        $destinationPath = $this->container->get('root_path') . '/tmp/' . $this->container->get('image_upload')['destination_path'];
         unlink($destinationPath . '/' . $image['id'] . '/75.' . $image['extension']);
         unlink($destinationPath . '/' . $image['id'] . '/50.' . $image['extension']);
         unlink($destinationPath . '/' . $image['id'] . '/25.' . $image['extension']);

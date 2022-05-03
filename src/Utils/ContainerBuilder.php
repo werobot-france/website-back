@@ -1,34 +1,36 @@
 <?php
+/** @noinspection PhpUnhandledExceptionInspection */
 
-namespace App;
+namespace App\Utils;
 
+use App\App;
+use Exception;
 use Psr\Container\ContainerInterface;
 
 class ContainerBuilder
 {
+    private static array $definitions = [
+        'config',
+        'database',
+        'auth',
+        'containers',
+    ];
+
     public static function getContainerBuilder(\DI\ContainerBuilder $containerBuilder = null): \DI\ContainerBuilder
     {
         if ($containerBuilder == null){
             $containerBuilder = new \DI\ContainerBuilder();
         }
-        $containerBuilder->addDefinitions(__DIR__ . '/config/config.php');
-        $containerBuilder->addDefinitions(__DIR__ . '/config/database.php');
-        $containerBuilder->addDefinitions(__DIR__ . '/config/auth.php');
-        $containerBuilder->addDefinitions(__DIR__ . '/config/containers.php');
-        $containerBuilder->addDefinitions([
-            'root_path' => dirname(__DIR__)
-        ]);
+        foreach (self::$definitions as $def) {
+            $containerBuilder->addDefinitions(App::getBasePath() . "/src/config/{$def}.php");
+        }
 
         return $containerBuilder;
     }
 
     public static function getContainerFromBuilder(\DI\ContainerBuilder $containerBuilder): ContainerInterface
     {
-        try {
-            return $containerBuilder->build();
-        } catch (\Exception $e) {
-            return NULL;
-        }
+        return $containerBuilder->build();
     }
 
     public static function direct(): ContainerInterface

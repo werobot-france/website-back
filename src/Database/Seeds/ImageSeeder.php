@@ -28,8 +28,8 @@ class ImageSeeder extends AbstractSeed
             $url = $faker->randomElement($baseImages);
             $response = $http->get($url);
             $extension = \App\ImageHelper::MIMETypeToExtension($response->getHeader('Content-Type')[0]);
-            $filePath = getenv('IMAGE_PATH') . '/' . $id . '/original.' . $extension;
-            mkdir(getenv('IMAGE_PATH') . '/' . $id);
+            $filePath = $_ENV['IMAGE_PATH'] . '/' . $id . '/original.' . $extension;
+            mkdir($_ENV['IMAGE_PATH'] . '/' . $id);
             file_put_contents($filePath, $response->getBody()->getContents());
             \App\ImageHelper::import($filePath);
             $imagesToInsert[] = [

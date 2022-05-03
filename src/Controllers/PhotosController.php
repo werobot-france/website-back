@@ -2,15 +2,14 @@
 
 namespace App\Controllers;
 
-use App\Instagram;
-use Lefuturiste\LocalStorage\LocalStorage;
+use App\Utils\Instagram;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Http\Response;
 use Validator\Validator;
 
 class PhotosController extends Controller
 {
-    public function photos(ServerRequestInterface $request, Response $response, Instagram $instagram, LocalStorage $localStorage)
+    public function photos(ServerRequestInterface $request, ResponseInterface $response)
     {
         $validator = new Validator($request->getQueryParams());
         $validator->notEmpty('limit');
@@ -22,7 +21,7 @@ class PhotosController extends Controller
             ], 400);
         }
         $limit = $validator->getValue('limit');
-        $photos = $instagram->getMedias();
+        $photos = $this->container->get(Instagram::class)->getMedias();
 //        if (!$localStorage->exist('instagram.medias')) {
 //            $localStorage->set('instagram.medias', $photos);
 //            $localStorage->save();
@@ -37,7 +36,7 @@ class PhotosController extends Controller
         ]);
     }
 
-    public function proxyInstagramImage(ServerRequestInterface $request, Response $response)
+    public function proxyInstagramImage(ServerRequestInterface $request, ResponseInterface $response)
     {
         $validator = new Validator($request->getQueryParams());
         $validator->required('url');
@@ -58,10 +57,12 @@ class PhotosController extends Controller
             mkdir($rootPath);
         }
 
+        //FIXME: remove useless function polyfill
         if (!function_exists('str_ends_with')) {
-            function str_ends_with($haystack, $needle) {
+            function str_ends_with($haystack, $needle): bool
+            {
                 $length = strlen($needle);
-                return $length > 0 ? substr($haystack, -$length) === $needle : true;
+                return !($length > 0) || substr($haystack, -$length) === $needle;
             }
         }
 
@@ -79,7 +80,7 @@ class PhotosController extends Controller
             $content = file_get_contents($url);
             file_put_contents($fullPath, $content);
         }
-    
+
         $response->getBody()->write($content);
         return $response
           ->withHeader('Content-Type', 'image/jpeg');
